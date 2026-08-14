@@ -1,0 +1,2057 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>毕业典礼 · 我们的三年</title>
+<style>
+  /* 使用系统字体 */
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --white: #ffffff;
+    --bg: #f5f5f7;
+    --text-primary: #1d1d1f;
+    --text-secondary: #86868b;
+    --accent: #0071e3;
+    --accent-gradient: linear-gradient(135deg, #0071e3 0%, #00c7ff 50%, #6c5ce7 100%);
+    --card-bg: rgba(255,255,255,0.72);
+    --card-border: rgba(0,0,0,0.06);
+    --radius: 24px;
+    --radius-sm: 16px;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    scroll-snap-type: y proximity;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", "Noto Sans SC", sans-serif;
+    background: var(--white);
+    color: var(--text-primary);
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── Background Canvas ── */
+  #bg-canvas {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  /* ── Floating Orbs ── */
+  .orb {
+    position: fixed;
+    border-radius: 50%;
+    filter: blur(80px);
+    opacity: 0.18;
+    z-index: 0;
+    pointer-events: none;
+    animation: orbFloat 20s ease-in-out infinite alternate;
+  }
+  .orb-1 { width: 600px; height: 600px; background: #0071e3; top: -200px; left: -100px; animation-delay: 0s; }
+  .orb-2 { width: 500px; height: 500px; background: #6c5ce7; top: 40%; right: -150px; animation-delay: -5s; animation-duration: 23s; }
+  .orb-3 { width: 450px; height: 450px; background: #00c7ff; bottom: -100px; left: 30%; animation-delay: -10s; animation-duration: 25s; }
+  .orb-4 { width: 350px; height: 350px; background: #ff6b9d; top: 60%; left: -100px; animation-delay: -15s; animation-duration: 22s; }
+  .orb-5 { width: 400px; height: 400px; background: #f9ca24; top: 20%; right: 30%; animation-delay: -3s; animation-duration: 28s; }
+  .orb-6 { width: 300px; height: 300px; background: #ff9ff3; bottom: 20%; right: 20%; animation-delay: -12s; animation-duration: 24s; }
+
+  @keyframes orbFloat {
+    0% { transform: translate(0, 0) scale(1) rotate(0deg); }
+    25% { transform: translate(80px, -50px) scale(1.12) rotate(3deg); }
+    50% { transform: translate(-40px, 60px) scale(0.93) rotate(-2deg); }
+    75% { transform: translate(50px, -30px) scale(1.06) rotate(1deg); }
+    100% { transform: translate(-20px, 40px) scale(0.98) rotate(-3deg); }
+  }
+
+  /* ── Navigation ── */
+  .nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 1000;
+    padding: 16px 24px;
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 6px;
+    background: rgba(255,255,255,0.72);
+    backdrop-filter: saturate(180%) blur(20px);
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
+    border-bottom: 1px solid var(--card-border);
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .nav.hidden { transform: translateY(-100%); }
+  .nav-pill {
+    padding: 6px 16px;
+    border-radius: 100px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    text-decoration: none;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    border: none;
+    background: transparent;
+    letter-spacing: -0.01em;
+    white-space: nowrap;
+  }
+  .nav-pill:hover, .nav-pill.active {
+    background: var(--text-primary);
+    color: var(--white);
+  }
+
+  /* ── Sections ── */
+  .section {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    z-index: 1;
+    padding: 120px 40px 80px;
+    scroll-snap-align: start;
+  }
+
+  /* ── Hero ── */
+  .hero {
+    text-align: center;
+    padding-top: 0;
+  }
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 20px;
+    border-radius: 100px;
+    background: rgba(0,113,227,0.08);
+    color: var(--accent);
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 32px;
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  .hero-badge .dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--accent);
+    animation: pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.8); }
+  }
+  .hero h1 {
+    font-size: clamp(48px, 8vw, 96px);
+    font-weight: 900;
+    letter-spacing: -0.03em;
+    line-height: 1.05;
+    margin-bottom: 24px;
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  .hero h1 .gradient-text {
+    background: var(--accent-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .hero-subtitle {
+    font-size: clamp(18px, 2.5vw, 28px);
+    color: var(--text-secondary);
+    font-weight: 400;
+    letter-spacing: -0.01em;
+    max-width: 600px;
+    margin: 0 auto 48px;
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  .scroll-hint {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    color: var(--text-secondary);
+    font-size: 13px;
+    opacity: 0;
+    animation: fadeInUp 1s ease 2s forwards;
+  }
+  .scroll-hint .arrow {
+    width: 24px; height: 24px;
+    border-right: 2px solid var(--text-secondary);
+    border-bottom: 2px solid var(--text-secondary);
+    transform: rotate(45deg);
+    animation: bounce 2s ease-in-out infinite;
+  }
+  @keyframes bounce {
+    0%, 100% { transform: rotate(45deg) translateY(0); }
+    50% { transform: rotate(45deg) translateY(8px); }
+  }
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 0.6; transform: translateY(0); }
+  }
+
+  /* ── Timeline Cards ── */
+  .timeline-section {
+    gap: 0;
+    padding: 80px 20px;
+    min-height: auto;
+  }
+  .timeline-section .section-header {
+    text-align: center;
+    margin-bottom: 80px;
+  }
+  .section-number {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 16px;
+    opacity: 0;
+  }
+  .section-title {
+    font-size: clamp(36px, 5vw, 64px);
+    font-weight: 900;
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  .section-desc {
+    font-size: 20px;
+    color: var(--text-secondary);
+    margin-top: 16px;
+    font-weight: 400;
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  /* ── Photo Frame (Polaroid Style) ── */
+  .photo-frame {
+    max-width: 750px;
+    width: 100%;
+    margin: 0 auto 50px;
+    padding: 14px 14px 50px 14px;
+    background: #fff;
+    border-radius: 4px;
+    position: relative;
+    opacity: 0;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.04);
+    transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+    cursor: pointer;
+  }
+  .photo-frame:nth-child(odd) { transform: translateY(40px) scale(0.94) rotate(-1.5deg); }
+  .photo-frame:nth-child(even) { transform: translateY(40px) scale(0.94) rotate(1.5deg); }
+  .photo-frame.visible {
+    opacity: 1;
+    transform: translateY(0) scale(1) rotate(0deg) !important;
+  }
+  .photo-frame:hover {
+    transform: translateY(-6px) scale(1.02) rotate(0deg) !important;
+    box-shadow: 0 16px 48px rgba(0,0,0,0.14), 0 2px 8px rgba(0,0,0,0.06);
+  }
+  /* Tape decoration */
+  .photo-frame::before {
+    content: '';
+    position: absolute;
+    top: -10px;
+    left: 50%;
+    transform: translateX(-50%) rotate(-2deg);
+    width: 80px;
+    height: 24px;
+    background: rgba(255,255,220,0.7);
+    border-radius: 2px;
+    z-index: 2;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.06);
+    opacity: 0.8;
+  }
+  .photo-frame:nth-child(even)::before {
+    transform: translateX(-50%) rotate(3deg);
+    width: 70px;
+    left: 45%;
+  }
+  .photo-frame img {
+    width: 100%;
+    display: block;
+    aspect-ratio: 16 / 10;
+    object-fit: cover;
+    border-radius: 2px;
+    transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .photo-frame video {
+    width: 100%;
+    display: block;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+    border-radius: 2px;
+    background: #000;
+    transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .photo-frame:hover img,
+  .photo-frame:hover video {
+    transform: scale(1.01);
+  }
+  .photo-frame .photo-caption {
+    position: absolute;
+    bottom: 10px;
+    left: 0; right: 0;
+    text-align: center;
+    padding: 6px 20px 0;
+    color: #555;
+    font-size: 16px;
+    font-family: local("LXGW WenKai"), "KaiTi", "STKaiti", "Ma Shan Zheng", cursive;
+    font-weight: 400;
+    letter-spacing: 0.04em;
+    opacity: 0.75;
+    transition: all 0.3s ease;
+    line-height: 1.3;
+  }
+  .photo-frame:hover .photo-caption {
+    opacity: 1;
+    color: #333;
+  }
+  .photo-placeholder {
+    width: 100%;
+    aspect-ratio: 16 / 10;
+    background: linear-gradient(135deg, #fafafa 0%, #f0f0f0 100%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    color: var(--text-secondary);
+    font-size: 14px;
+    font-weight: 500;
+    border: 2px dashed rgba(0,0,0,0.1);
+    border-radius: 2px;
+    transition: all 0.3s ease;
+  }
+  .photo-placeholder .placeholder-icon {
+    font-size: 40px;
+    opacity: 0.5;
+  }
+  .photo-placeholder:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: linear-gradient(135deg, rgba(0,113,227,0.03) 0%, rgba(0,113,227,0.06) 100%);
+  }
+
+  /* ── Year Divider ── */
+  .year-divider {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    max-width: 1100px;
+    width: 100%;
+    margin: 20px auto 0;
+    padding: 0 20px;
+  }
+  .year-divider .line {
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--card-border), transparent);
+  }
+  .year-divider .year-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--accent);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    opacity: 0;
+  }
+  .year-divider .year-label.visible { opacity: 1; transition: opacity 0.8s ease; }
+
+  /* ── Memory Card ── */
+  .memory-card {
+    max-width: 1100px;
+    width: 100%;
+    margin: 0 auto 60px;
+    border-radius: var(--radius);
+    overflow: hidden;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    min-height: 480px;
+    opacity: 0;
+    transform: translateY(60px) scale(0.96);
+    transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.5s ease;
+    box-shadow: 0 4px 40px rgba(0,0,0,0.06);
+    position: relative;
+  }
+  .memory-card:hover {
+    transform: translateY(-4px) scale(1);
+    box-shadow: 0 20px 80px rgba(0,0,0,0.1);
+  }
+  .memory-card.visible {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+
+  .card-visual {
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 480px;
+  }
+  .card-visual .card-emoji {
+    font-size: 120px;
+    opacity: 0.9;
+    transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .memory-card:hover .card-emoji {
+    transform: scale(1.1) rotate(-5deg);
+  }
+  .card-visual::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.1), transparent);
+  }
+
+  /* Card color themes */
+  .card-theme-blue { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+  .card-theme-warm { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+  .card-theme-green { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+  .card-theme-gold { background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); }
+  .card-theme-orange { background: linear-gradient(135deg, #f6d365 0%, #fda085 100%); }
+  .card-theme-teal { background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%); }
+  .card-theme-violet { background: linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%); }
+  .card-theme-red { background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%); }
+  .card-theme-indigo { background: linear-gradient(135deg, #667eea 0%, #f093fb 100%); }
+
+  .card-content {
+    padding: 56px 48px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    background: var(--card-bg);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+  }
+  .card-date {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 12px;
+  }
+  .card-title {
+    font-size: 32px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    margin-bottom: 16px;
+    line-height: 1.2;
+  }
+  .card-text {
+    font-size: 17px;
+    line-height: 1.7;
+    color: var(--text-secondary);
+    font-weight: 400;
+  }
+  .card-tag {
+    display: inline-flex;
+    padding: 6px 14px;
+    border-radius: 100px;
+    background: rgba(0,113,227,0.08);
+    color: var(--accent);
+    font-size: 13px;
+    font-weight: 500;
+    margin-top: 20px;
+    width: fit-content;
+  }
+
+  /* ── Lyrics Section ── */
+  .lyrics-section {
+    min-height: auto;
+    padding: 100px 40px;
+    text-align: center;
+  }
+  .lyrics-trigger {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    cursor: pointer;
+    padding: 60px 80px;
+    border-radius: var(--radius);
+    background: var(--card-bg);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--card-border);
+    box-shadow: 0 4px 40px rgba(0,0,0,0.06);
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    opacity: 0;
+    transform: translateY(40px);
+    position: relative;
+    overflow: hidden;
+  }
+  .lyrics-trigger.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .lyrics-trigger:hover {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 0 24px 80px rgba(0,0,0,0.12);
+  }
+  .lyrics-trigger::before {
+    content: '';
+    position: absolute;
+    top: -50%; left: -50%;
+    width: 200%; height: 200%;
+    background: conic-gradient(from 0deg, transparent, rgba(0,113,227,0.04), transparent, rgba(108,92,231,0.04), transparent);
+    animation: lyricsGlow 6s linear infinite;
+  }
+  @keyframes lyricsGlow {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+  .lyrics-trigger .icon-wrap {
+    width: 80px; height: 80px;
+    border-radius: 50%;
+    background: var(--accent-gradient);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    z-index: 1;
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .lyrics-trigger:hover .icon-wrap {
+    transform: scale(1.1);
+  }
+  .lyrics-trigger .icon-wrap span {
+    line-height: 1;
+  }
+  .lyrics-trigger .pulse-ring {
+    position: absolute;
+    width: 80px; height: 80px;
+    border-radius: 50%;
+    border: 2px solid rgba(0,113,227,0.2);
+    animation: pulseRing 2s ease-out infinite;
+  }
+  @keyframes pulseRing {
+    0% { transform: scale(1); opacity: 1; }
+    100% { transform: scale(1.8); opacity: 0; }
+  }
+  .lyrics-trigger .trigger-title {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    position: relative;
+    z-index: 1;
+  }
+  .lyrics-trigger .trigger-sub {
+    font-size: 15px;
+    color: var(--text-secondary);
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ── Lyrics Modal ── */
+  .lyrics-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 2000;
+    background: rgba(0,0,0,0.4);
+    backdrop-filter: blur(30px);
+    -webkit-backdrop-filter: blur(30px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .lyrics-overlay.open {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .lyrics-modal {
+    width: 90%;
+    max-width: 680px;
+    max-height: 85vh;
+    background: rgba(255,255,255,0.92);
+    backdrop-filter: saturate(180%) blur(40px);
+    -webkit-backdrop-filter: saturate(180%) blur(40px);
+    border-radius: var(--radius);
+    border: 1px solid rgba(255,255,255,0.5);
+    box-shadow: 0 40px 120px rgba(0,0,0,0.2);
+    overflow-y: auto;
+    transform: translateY(60px) scale(0.92);
+    transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+  }
+  .lyrics-overlay.open .lyrics-modal {
+    transform: translateY(0) scale(1);
+  }
+  .lyrics-modal::-webkit-scrollbar { width: 6px; }
+  .lyrics-modal::-webkit-scrollbar-track { background: transparent; }
+  .lyrics-modal::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.12); border-radius: 3px; }
+  .lyrics-header {
+    position: sticky;
+    top: 0;
+    padding: 32px 40px 24px;
+    background: rgba(255,255,255,0.8);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--card-border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    z-index: 1;
+  }
+  .lyrics-header .song-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .lyrics-header .song-name {
+    font-size: 24px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    background: var(--accent-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .lyrics-header .song-artist {
+    font-size: 14px;
+    color: var(--text-secondary);
+    font-weight: 500;
+  }
+  .lyrics-close {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(0,0,0,0.06);
+    color: var(--text-primary);
+    font-size: 20px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+  }
+  .lyrics-close:hover {
+    background: rgba(0,0,0,0.12);
+    transform: rotate(90deg);
+  }
+  .lyrics-body {
+    padding: 40px 48px 48px;
+  }
+  .lyrics-body .lyric-line {
+    font-size: 18px;
+    line-height: 2.2;
+    color: var(--text-primary);
+    font-weight: 400;
+    opacity: 0;
+    transform: translateY(12px);
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    letter-spacing: 0.02em;
+  }
+  .lyrics-overlay.open .lyric-line {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .lyrics-body .lyric-line.highlight {
+    color: var(--accent);
+    font-weight: 600;
+    font-size: 20px;
+  }
+  .lyrics-body .lyric-gap {
+    height: 20px;
+  }
+  .lyrics-body .lyric-section-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    margin-bottom: 8px;
+    margin-top: 24px;
+    opacity: 0.6;
+  }
+
+  /* ── Stats Grid ── */
+  .stats-section {
+    min-height: auto;
+    padding: 100px 40px;
+  }
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 24px;
+    max-width: 1100px;
+    width: 100%;
+    margin-top: 60px;
+  }
+  .stat-card {
+    background: var(--card-bg);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius);
+    padding: 40px 32px;
+    text-align: center;
+    opacity: 0;
+    transform: translateY(40px);
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .stat-card.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .stat-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.08);
+  }
+  .stat-number {
+    font-size: 56px;
+    font-weight: 900;
+    letter-spacing: -0.03em;
+    background: var(--accent-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1;
+    margin-bottom: 8px;
+  }
+  .stat-unit {
+    font-size: 20px;
+    font-weight: 600;
+    -webkit-text-fill-color: var(--text-primary);
+  }
+  .stat-label {
+    font-size: 15px;
+    color: var(--text-secondary);
+    font-weight: 500;
+  }
+
+  /* ── Quote Section ── */
+  .quote-section {
+    text-align: center;
+    padding: 120px 40px;
+  }
+  .quote-mark {
+    font-size: 120px;
+    line-height: 1;
+    background: var(--accent-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    opacity: 0.3;
+    font-family: Georgia, serif;
+  }
+  .quote-text {
+    font-size: clamp(24px, 3.5vw, 42px);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.4;
+    max-width: 800px;
+    margin: -20px auto 32px;
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  .quote-author {
+    font-size: 18px;
+    color: var(--text-secondary);
+    font-weight: 500;
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  /* ── Closing ── */
+  .closing {
+    text-align: center;
+    padding-bottom: 120px;
+  }
+  .closing h2 {
+    font-size: clamp(40px, 6vw, 80px);
+    font-weight: 900;
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+    margin-bottom: 24px;
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  .closing-text {
+    font-size: 20px;
+    color: var(--text-secondary);
+    max-width: 600px;
+    margin: 0 auto 24px;
+    line-height: 1.6;
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  .closing-quote {
+    font-size: clamp(20px, 3vw, 30px);
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    line-height: 1.5;
+    max-width: 600px;
+    margin: 0 auto 48px;
+    opacity: 0;
+    transform: translateY(20px);
+    background: var(--accent-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .year-badge {
+    display: inline-flex;
+    padding: 16px 40px;
+    border-radius: var(--radius);
+    background: var(--text-primary);
+    color: var(--white);
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  /* ── Particle Canvas ── */
+  #particles {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  /* ── Progress Bar ── */
+  .progress-bar {
+    position: fixed;
+    top: 0; left: 0;
+    height: 3px;
+    background: var(--accent-gradient);
+    z-index: 1001;
+    transition: width 0.15s linear;
+    border-radius: 0 2px 2px 0;
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 768px) {
+    .memory-card {
+      grid-template-columns: 1fr;
+      min-height: auto;
+    }
+    .card-visual { min-height: 280px; }
+    .card-content { padding: 36px 28px; }
+    .card-title { font-size: 26px; }
+    .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 16px; }
+    .stat-number { font-size: 40px; }
+    .nav { padding: 10px 12px; gap: 4px; }
+    .nav-pill { padding: 5px 10px; font-size: 11px; }
+    .section { padding: 100px 24px 60px; }
+    .photo-frame { padding: 10px 10px 36px 10px; max-width: 90vw; }
+    .photo-frame::before { width: 50px; height: 16px; top: -8px; }
+    .photo-frame .photo-caption { font-size: 14px; bottom: 6px; }
+    .lyrics-trigger { padding: 40px 24px; }
+    .lyrics-modal { width: 95%; }
+    .lyrics-body { padding: 24px 20px; }
+    .floating-emoji { display: none; }
+  }
+
+  /* ── Animations ── */
+  .reveal {
+    opacity: 0;
+    transform: translateY(40px);
+    transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1),
+                transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .reveal-delay-1 { transition-delay: 0.1s; }
+  .reveal-delay-2 { transition-delay: 0.2s; }
+  .reveal-delay-3 { transition-delay: 0.3s; }
+  .reveal-delay-4 { transition-delay: 0.4s; }
+
+  /* Directional reveal animations */
+  .reveal-left {
+    opacity: 0;
+    transform: translateX(-60px);
+    transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1),
+                transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .reveal-left.visible { opacity: 1; transform: translateX(0); }
+  .reveal-right {
+    opacity: 0;
+    transform: translateX(60px);
+    transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1),
+                transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .reveal-right.visible { opacity: 1; transform: translateX(0); }
+  .reveal-scale {
+    opacity: 0;
+    transform: scale(0.85);
+    transition: opacity 0.7s cubic-bezier(0.34, 1.56, 0.64, 1),
+                transform 0.7s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .reveal-scale.visible { opacity: 1; transform: scale(1); }
+
+  /* Section divider */
+  .section-divider {
+    width: 120px;
+    height: 3px;
+    margin: 0 auto 60px;
+    background: var(--accent-gradient);
+    border-radius: 2px;
+    opacity: 0.3;
+  }
+
+  /* Active section highlight */
+  .section.active-section {
+    background: radial-gradient(ellipse at center, rgba(0,113,227,0.015) 0%, transparent 70%);
+  }
+
+  /* Hero character animation */
+  .hero-char {
+    display: inline-block;
+    opacity: 0;
+    transform: translateY(60px) rotateX(-20deg);
+    animation: charFlyIn 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  }
+  .hero-char-gradient {
+    display: inline;
+    background: transparent !important;
+  }
+  @keyframes charFlyIn {
+    to { opacity: 1; transform: translateY(0) rotateX(0); }
+  }
+
+  /* Hero badge glow */
+  .hero-badge-glow {
+    box-shadow: 0 0 30px rgba(0,113,227,0.15), 0 0 60px rgba(0,113,227,0.08);
+    animation: badgeGlow 2.5s ease-in-out infinite alternate;
+  }
+  @keyframes badgeGlow {
+    0% { box-shadow: 0 0 20px rgba(0,113,227,0.1), 0 0 40px rgba(0,113,227,0.04); }
+    100% { box-shadow: 0 0 40px rgba(0,113,227,0.2), 0 0 80px rgba(108,92,231,0.1); }
+  }
+
+  /* Typewriter cursor */
+  .typewriter-cursor {
+    display: inline-block;
+    width: 2px;
+    height: 1em;
+    background: var(--accent);
+    margin-left: 2px;
+    animation: cursorBlink 0.8s step-end infinite;
+    vertical-align: text-bottom;
+  }
+  @keyframes cursorBlink {
+    50% { opacity: 0; }
+  }
+
+  /* Floating emoji decoration */
+  .floating-emoji {
+    position: fixed;
+    pointer-events: none;
+    z-index: 0;
+    font-size: 28px;
+    opacity: 0.12;
+    animation: floatEmoji 18s ease-in-out infinite;
+  }
+  @keyframes floatEmoji {
+    0%, 100% { transform: translate(0, 0) rotate(0deg) scale(1); }
+    25% { transform: translate(40px, -80px) rotate(15deg) scale(1.2); }
+    50% { transform: translate(-30px, -160px) rotate(-10deg) scale(0.9); }
+    75% { transform: translate(50px, -240px) rotate(8deg) scale(1.1); }
+  }
+
+  /* Count-up number emphasis */
+  .stat-number.counting {
+    animation: countPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  @keyframes countPop {
+    0% { transform: scale(0.5); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+
+  /* Nav pill elastic transition */
+  .nav-pill {
+    transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  /* ── Glass Card ── */
+  .glass {
+    background: rgba(255,255,255,0.6);
+    backdrop-filter: saturate(180%) blur(20px);
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
+    border: 1px solid rgba(255,255,255,0.4);
+  }
+
+  /* ── Watermark ── */
+  .watermark {
+    position: fixed;
+    bottom: 20px;
+    left: 24px;
+    z-index: 999;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    color: rgba(0,0,0,0.08);
+    pointer-events: none;
+    user-select: none;
+    writing-mode: horizontal-tb;
+  }
+
+  /* ── Music Button ── */
+  .music-btn {
+    position: fixed;
+    bottom: 32px;
+    right: 32px;
+    z-index: 1000;
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(255,255,255,0.8);
+    backdrop-filter: saturate(180%) blur(20px);
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
+    box-shadow: 0 4px 24px rgba(0,0,0,0.1), 0 0 0 1px rgba(0,0,0,0.04);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow: hidden;
+  }
+  .music-btn:hover {
+    transform: scale(1.1);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.15), 0 0 0 1px rgba(0,0,0,0.06);
+  }
+  .music-btn:active {
+    transform: scale(0.95);
+  }
+  .music-btn .music-icon {
+    font-size: 22px;
+    transition: transform 0.3s ease;
+    line-height: 1;
+  }
+  .music-btn.playing .music-icon {
+    animation: musicBounce 1.2s ease-in-out infinite;
+  }
+  @keyframes musicBounce {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.15); }
+  }
+  .music-btn .music-bars {
+    display: flex;
+    align-items: flex-end;
+    gap: 2px;
+    height: 18px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  .music-btn.playing .music-bars {
+    opacity: 1;
+  }
+  .music-btn.playing .music-icon {
+    display: none;
+  }
+  .music-btn .music-bar {
+    width: 3px;
+    border-radius: 2px;
+    background: var(--accent);
+  }
+  .music-btn .music-bar:nth-child(1) { animation: barAnim 0.8s ease-in-out infinite alternate; height: 8px; animation-delay: 0s; }
+  .music-btn .music-bar:nth-child(2) { animation: barAnim 0.8s ease-in-out infinite alternate; height: 14px; animation-delay: 0.2s; }
+  .music-btn .music-bar:nth-child(3) { animation: barAnim 0.8s ease-in-out infinite alternate; height: 10px; animation-delay: 0.4s; }
+  .music-btn .music-bar:nth-child(4) { animation: barAnim 0.8s ease-in-out infinite alternate; height: 16px; animation-delay: 0.1s; }
+  @keyframes barAnim {
+    0% { height: 4px; }
+    100% { height: 18px; }
+  }
+  .music-hint {
+    position: fixed;
+    bottom: 40px;
+    right: 96px;
+    z-index: 1000;
+    padding: 8px 16px;
+    border-radius: 100px;
+    background: rgba(255,255,255,0.9);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+    font-size: 13px;
+    color: var(--text-secondary);
+    font-weight: 500;
+    opacity: 0;
+    transform: translateX(10px);
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    pointer-events: none;
+    white-space: nowrap;
+  }
+  .music-hint.show {
+    opacity: 1;
+    transform: translateX(0);
+  }
+
+  /* ── Confetti (on closing) ── */
+  .confetti-piece {
+    position: fixed;
+    z-index: 999;
+    pointer-events: none;
+    opacity: 0;
+  }
+</style>
+</head>
+<body>
+
+<!-- Background Effects -->
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+<div class="orb orb-3"></div>
+<div class="orb orb-4"></div>
+<div class="orb orb-5"></div>
+<div class="orb orb-6"></div>
+<canvas id="particles"></canvas>
+<div class="progress-bar" id="progressBar"></div>
+
+<!-- Floating Emoji Decorations -->
+<div class="floating-emoji" style="top:15%;left:8%;animation-delay:0s;font-size:32px;">🎓</div>
+<div class="floating-emoji" style="top:55%;right:6%;animation-delay:-5s;font-size:24px;">✨</div>
+<div class="floating-emoji" style="top:75%;left:12%;animation-delay:-10s;font-size:28px;">🌟</div>
+<div class="floating-emoji" style="top:35%;right:12%;animation-delay:-15s;font-size:22px;">🎓</div>
+
+<!-- Navigation -->
+<nav class="nav" id="nav">
+  <a class="nav-pill active" href="#hero">首页</a>
+  <a class="nav-pill" href="#ch1">分班</a>
+  <a class="nav-pill" href="#ch2">篮球赛</a>
+  <a class="nav-pill" href="#ch3">冬至</a>
+  <a class="nav-pill" href="#ch4">班级运动会</a>
+  <a class="nav-pill" href="#ch5">研学</a>
+  <a class="nav-pill" href="#ch6">足球赛</a>
+  <a class="nav-pill" href="#ch7">校运会</a>
+  <a class="nav-pill" href="#ch8">中秋</a>
+  <a class="nav-pill" href="#ch9">百日誓师</a>
+  <a class="nav-pill" href="#lyrics">记念</a>
+  <a class="nav-pill" href="#closing">启程</a>
+</nav>
+
+<!-- Hero -->
+<section class="section hero" id="hero">
+  <div class="hero-badge hero-badge-glow">
+    <span class="dot"></span>
+    毕业典礼 · 我们的三年
+  </div>
+  <h1 id="heroTitle">我们的<span class="gradient-text">三年</span></h1>
+  <p class="hero-subtitle" id="heroSubtitle">从陌生到熟悉，从青涩到成熟。这是属于我们班的故事。</p>
+  <div class="scroll-hint">
+    <span>向下滚动</span>
+    <div class="arrow"></div>
+  </div>
+</section>
+
+<!-- ───────── 高一下 ───────── -->
+
+<!-- Year Divider -->
+<div class="year-divider" style="padding-top:40px;">
+  <div class="line"></div>
+  <span class="year-label reveal">高一下</span>
+  <div class="line"></div>
+</div>
+
+<!-- Chapter 1: 分班 -->
+<section class="section timeline-section" id="ch1">
+  <div class="section-header">
+    <div class="section-number reveal">Chapter One</div>
+    <h2 class="section-title reveal reveal-delay-1">命运的分班</h2>
+    <p class="section-desc reveal reveal-delay-2">一切从这里开始</p>
+  </div>
+  <div class="memory-card" data-animate>
+    <div class="card-visual card-theme-blue">
+      <span class="card-emoji">🏫</span>
+    </div>
+    <div class="card-content">
+      <div class="card-date">高一下学期</div>
+      <h3 class="card-title">50个陌生人，1个教室</h3>
+      <p class="card-text">
+        还记得那天吗？走廊里贴着分班名单，我们在人群中寻找自己的名字。
+        走进教室的那一刻，四周都是陌生的面孔——谁也没想到，这些陌生人，
+        会成为未来三年里最亲密的战友。
+      </p>
+      <p class="card-text" style="margin-top: 12px;">
+        那时的我们，小心翼翼地试探彼此，用一句"你叫什么名字"开启了这段旅程。
+      </p>
+      <div class="card-tag">📍 一切的起点</div>
+    </div>
+  </div>
+  <div class="photo-frame" data-animate>
+    <div class="photo-placeholder" style="aspect-ratio: 16/8; border-style: solid; border-color: rgba(0,0,0,0.06);">
+      <span class="placeholder-icon">😅</span>
+      <span style="font-size: 15px; font-weight: 600; color: var(--text-primary);">王班长没收拾，没找到刚分班的合照</span>
+      <span style="font-size: 13px; color: var(--text-secondary); font-style: italic;">碎碎念：其实没拍过吧</span>
+    </div>
+  </div>
+</section>
+
+<!-- Chapter 2: 篮球赛 -->
+<section class="section timeline-section" id="ch2">
+  <div class="section-header">
+    <div class="section-number reveal">Chapter Two</div>
+    <h2 class="section-title reveal reveal-delay-1">篮球赛</h2>
+    <p class="section-desc reveal reveal-delay-2">第一次为彼此而战</p>
+  </div>
+  <div class="memory-card" data-animate>
+    <div class="card-visual card-theme-orange">
+      <span class="card-emoji">🏀</span>
+    </div>
+    <div class="card-content">
+      <div class="card-date">高一下学期</div>
+      <h3 class="card-title">球场上的少年们</h3>
+      <p class="card-text">
+        分班后的第一次集体对抗——篮球赛。场上的人拼命突破、投篮，
+        场下的人扯着嗓子加油。赢了一起欢呼，输了一起沉默，
+        然后拍拍肩膀说"下一场再来"。
+      </p>
+      <p class="card-text" style="margin-top: 12px;">
+        那时候我们才刚认识不久，却已经在球场边学会了为同一个目标呐喊。
+        篮球让我们从"同班同学"变成了"队友"。
+      </p>
+      <div class="card-tag">🏀 第一次并肩作战</div>
+    </div>
+  </div>
+  <div class="photo-frame" data-animate>
+    <img src="photo-01.jpg" alt="篮球赛">
+    <div class="photo-caption">高一下 · 篮球赛</div>
+  </div>
+</section>
+
+<!-- Chapter 3: 冬至晚会 -->
+<section class="section timeline-section" id="ch3">
+  <div class="section-header">
+    <div class="section-number reveal">Chapter Three</div>
+    <h2 class="section-title reveal reveal-delay-1">冬至晚会</h2>
+    <p class="section-desc reveal reveal-delay-2">我们班的第一个舞台</p>
+  </div>
+  <div class="memory-card" data-animate>
+    <div class="card-visual card-theme-warm">
+      <span class="card-emoji">🎭</span>
+    </div>
+    <div class="card-content">
+      <div class="card-date">高一 · 冬至</div>
+      <h3 class="card-title">第一次站上舞台</h3>
+      <p class="card-text">
+        冬至晚会，是我们班第一次以集体的名义亮相。排练时的手忙脚乱，
+        上台前的紧张到发抖，音乐响起的那一刻——所有的不安都化成了勇气。
+      </p>
+      <p class="card-text" style="margin-top: 12px;">
+        那个节目或许不是最完美的，但台下为我们欢呼的声音，
+        我想每个人都记到了现在。那是我们第一次真正感受到——
+        <strong>我们是一个班。</strong>
+      </p>
+      <div class="card-tag">🌟 第一个高光时刻</div>
+    </div>
+  </div>
+  <div class="photo-frame" data-animate>
+    <img src="微信图片_20260523220742_26487_13.jpg" alt="冬至晚会">
+    <div class="photo-caption">高一 · 冬至晚会</div>
+  </div>
+</section>
+
+<!-- ───────── 高二 ───────── -->
+
+<div class="year-divider">
+  <div class="line"></div>
+  <span class="year-label reveal">高二</span>
+  <div class="line"></div>
+</div>
+
+<!-- Chapter 4: 班级运动会 -->
+<section class="section timeline-section" id="ch4">
+  <div class="section-header">
+    <div class="section-number reveal">Chapter Four</div>
+    <h2 class="section-title reveal reveal-delay-1">班级运动会</h2>
+    <p class="section-desc reveal reveal-delay-2">笑着闹着，就赢了</p>
+  </div>
+  <div class="memory-card" data-animate>
+    <div class="card-visual card-theme-green">
+      <span class="card-emoji">🎯</span>
+    </div>
+    <div class="card-content">
+      <div class="card-date">高二 · 班级运动会</div>
+      <h3 class="card-title">那些奇奇怪怪的项目</h3>
+      <p class="card-text">
+        <strong>摸石过河</strong>——踩着三块泡沫砖往前挪，有人稳如泰山，
+        有人一脚踩空直接"下水"，全场笑到肚子疼。
+      </p>
+      <p class="card-text" style="margin-top: 10px;">
+        <strong>蒙眼打人</strong>——蒙着眼睛挥海绵棒，靠听觉和运气出击。
+        被打到的人一脸懵，打到空气的人更搞笑。
+      </p>
+      <p class="card-text" style="margin-top: 10px;">
+        <strong>你演我猜</strong>——比划的人手舞足蹈，猜的人一脸问号。
+        有些答案离谱到让全班笑翻，但默契就是这样慢慢练出来的。
+      </p>
+      <div class="card-tag">😂 笑到停不下来</div>
+    </div>
+  </div>
+  <div class="photo-frame" data-animate>
+    <video src="QQ视频20260609163950(6).mp4" controls preload="metadata" style="width:100%; display:block; aspect-ratio: 16/9; border-radius: 2px; background: #000;" playsinline>
+      您的浏览器不支持视频播放
+    </video>
+    <div class="photo-caption">高二 · 班级运动会</div>
+  </div>
+</section>
+
+<!-- Chapter 5: 研学 -->
+<section class="section timeline-section" id="ch5">
+  <div class="section-header">
+    <div class="section-number reveal">Chapter Five</div>
+    <h2 class="section-title reveal reveal-delay-1">研学活动</h2>
+    <p class="section-desc reveal reveal-delay-2">走出教室的另一种学习</p>
+  </div>
+  <div class="memory-card" data-animate>
+    <div class="card-visual card-theme-gold">
+      <span class="card-emoji">🌍</span>
+    </div>
+    <div class="card-content">
+      <div class="card-date">高二 · 研学季</div>
+      <h3 class="card-title">课本之外的世界</h3>
+      <p class="card-text">
+        去机场参观飞机，看着银色的庞然大物从头顶掠过，
+        每个人都仰着脖子发出“哇”的声音；去蒙顶山采茶，
+        背着竹篓在茶园里穿梭，采得比谁都认真，喝得比谁都开心；
+        追寻红色脚步，在纪念馆里安静下来，听那些跨越时空的故事。
+      </p>
+      <p class="card-text" style="margin-top: 12px;">
+        当然最难忘的还是饭桌上的抢菜大战——
+        筷子的速度决定一切，手慢无是铁律。
+      </p>
+      <p class="card-text" style="margin-top: 12px; font-style: italic; color: var(--accent);">
+        话说回来，好像第七人民医院才是真正的研学圣地啊……
+        毕竟每次研学都有人去“打卡”。🏥
+      </p>
+      <div class="card-tag">🗺️ 课本之外</div>
+    </div>
+  </div>
+  <div class="photo-frame" data-animate>
+    <img src="QQ图片20260605012836.jpeg" alt="研学活动">
+    <div class="photo-caption">高二 · 研学活动</div>
+  </div>
+</section>
+
+<!-- Chapter 6: 足球总决赛 -->
+<section class="section timeline-section" id="ch6">
+  <div class="section-header">
+    <div class="section-number reveal">Chapter Six</div>
+    <h2 class="section-title reveal reveal-delay-1">足球总决赛</h2>
+    <p class="section-desc reveal reveal-delay-2">冠军，是我们！</p>
+  </div>
+  <div class="memory-card" data-animate>
+    <div class="card-visual card-theme-teal">
+      <span class="card-emoji">⚽</span>
+    </div>
+    <div class="card-content">
+      <div class="card-date">高二下 · 足球总决赛</div>
+      <h3 class="card-title">我们是冠军！</h3>
+      <p class="card-text">
+        那场决赛，所有人都去了。场上的人拼到抽筋也不肯下场，
+        场下的人喊到失声还在喊。当终场哨声响起的那一刻——
+        我们赢了。
+      </p>
+      <p class="card-text" style="margin-top: 12px;">
+        那种全场一起跳起来、一起哭、一起笑的感觉，
+        大概这辈子都忘不了。冠军奖杯上写的不只是班级名字，
+        更是我们整整一年的汗水和信念。
+      </p>
+      <div class="card-tag">🏆 冠军荣耀</div>
+    </div>
+  </div>
+  <div class="photo-frame" data-animate>
+    <img src="QQ图片20260605012804.jpeg" alt="足球夺冠">
+    <div class="photo-caption">高二下 · 足球总决赛·冠军</div>
+  </div>
+</section>
+
+<!-- Chapter 7: 校运会 -->
+<section class="section timeline-section" id="ch7">
+  <div class="section-header">
+    <div class="section-number reveal">Chapter Seven</div>
+    <h2 class="section-title reveal reveal-delay-1">校运会</h2>
+    <p class="section-desc reveal reveal-delay-2">为班级而跑，为荣誉而拼</p>
+  </div>
+  <div class="memory-card" data-animate>
+    <div class="card-visual card-theme-red">
+      <span class="card-emoji">🏃</span>
+    </div>
+    <div class="card-content">
+      <div class="card-date">高二 · 校运会</div>
+      <h3 class="card-title">赛道上的荣耀</h3>
+      <p class="card-text">
+        校运会大概是高中最热血的记忆了。赛道上的人拼尽全力奔跑，
+        赛道外的人喊到嗓子沙哑。有人拿了名次，有人遗憾摔倒，
+        但每个人冲过终点时，迎接他们的都是整个班的拥抱。
+      </p>
+      <p class="card-text" style="margin-top: 12px;">
+        那些天我们写了无数篇广播稿，扯着嗓子加油，
+        把班级口号喊到全校都听见。青春的热血，大概就是这个味道。
+      </p>
+      <div class="card-tag">🔥 热血与荣耀</div>
+    </div>
+  </div>
+  <div class="photo-frame" data-animate>
+    <img src="QQ图片20260605012916(24).jpeg" alt="校运会">
+    <div class="photo-caption">高二 · 校运会</div>
+  </div>
+</section>
+
+<!-- ───────── 高三 ───────── -->
+
+<div class="year-divider">
+  <div class="line"></div>
+  <span class="year-label reveal">高三</span>
+  <div class="line"></div>
+</div>
+
+<!-- Chapter 8: 中秋晚会 -->
+<section class="section timeline-section" id="ch8">
+  <div class="section-header">
+    <div class="section-number reveal">Chapter Eight</div>
+    <h2 class="section-title reveal reveal-delay-1">中秋晚会</h2>
+    <p class="section-desc reveal reveal-delay-2">高三的第一个节日</p>
+  </div>
+  <div class="memory-card" data-animate>
+    <div class="card-visual card-theme-violet">
+      <span class="card-emoji">🌕</span>
+    </div>
+    <div class="card-content">
+      <div class="card-date">高三上 · 中秋</div>
+      <h3 class="card-title">月光下的我们</h3>
+      <p class="card-text">
+        高三的中秋，气氛和以前不一样了。桌上堆满了试卷和教辅，
+        但那天晚上，我们暂时忘掉了分数和排名。
+      </p>
+      <p class="card-text" style="margin-top: 12px;">
+        教室里挂满了彩灯，大家分享着月饼和零食，
+        有人唱歌、有人讲笑话、有人安静地笑着。
+        那是我们高三里最温柔的一个夜晚——
+        月亮很圆，我们很好。
+      </p>
+      <div class="card-tag">🌙 最温柔的夜晚</div>
+    </div>
+  </div>
+  <div class="photo-frame" data-animate>
+    <img src="QQ图片20260605013007(25).jpeg" alt="中秋晚会">
+    <div class="photo-caption">高三上 · 中秋晚会</div>
+  </div>
+</section>
+
+<!-- Chapter 9: 百日誓师 -->
+<section class="section timeline-section" id="ch9">
+  <div class="section-header">
+    <div class="section-number reveal">Chapter Nine</div>
+    <h2 class="section-title reveal reveal-delay-1">百日誓师</h2>
+    <p class="section-desc reveal reveal-delay-2">最后一百天，全力以赴</p>
+  </div>
+  <div class="memory-card" data-animate>
+    <div class="card-visual card-theme-indigo">
+      <span class="card-emoji">✊</span>
+    </div>
+    <div class="card-content">
+      <div class="card-date">高三 · 百日誓师</div>
+      <h3 class="card-title">一百天，拼了</h3>
+      <p class="card-text">
+        操场上，我们举起右拳，齐声宣誓。那一刻，
+        每个人的眼睛里都有光——不是因为不害怕，
+        而是因为我们知道，身边的人都在。
+      </p>
+      <p class="card-text" style="margin-top: 12px;">
+        一百天说长不长，说短不短。但从那天起，
+        每一张试卷、每一次模考、每一个熬夜的晚上，
+        都有了"我们一起"的底气。
+        这不是一个人的战斗，这是我们全班的冲刺。
+      </p>
+      <div class="card-tag">💪 一起拼到最后</div>
+    </div>
+  </div>
+  <div class="photo-frame" data-animate>
+    <img src="QQ图片20260605013219(2).jpeg" alt="百日誓师">
+    <div class="photo-caption">高三 · 百日誓师</div>
+  </div>
+</section>
+
+<!-- Stats -->
+<section class="section stats-section" id="stats">
+  <div class="section-header">
+    <div class="section-number reveal">By the Numbers</div>
+    <h2 class="section-title reveal reveal-delay-1">三年，这些数字</h2>
+  </div>
+  <div class="stats-grid">
+    <div class="stat-card" data-animate>
+      <div class="stat-number">1095</div>
+      <div class="stat-label">一起走过的天数</div>
+    </div>
+    <div class="stat-card" data-animate>
+      <div class="stat-number">50<span class="stat-unit">+</span></div>
+      <div class="stat-label">场考试</div>
+    </div>
+    <div class="stat-card" data-animate>
+      <div class="stat-number">∞</div>
+      <div class="stat-label">次欢笑</div>
+    </div>
+    <div class="stat-card" data-animate>
+      <div class="stat-number">1</div>
+      <div class="stat-label">个永远的班</div>
+    </div>
+  </div>
+</section>
+
+<!-- Lyrics Section -->
+<section class="section lyrics-section" id="lyrics">
+  <div class="section-header">
+    <div class="section-number reveal">For Us</div>
+    <h2 class="section-title reveal reveal-delay-1">有一首歌</h2>
+    <p class="section-desc reveal reveal-delay-2">送给我们的三年</p>
+  </div>
+  <div class="lyrics-trigger" data-animate id="lyricsTrigger">
+    <div class="icon-wrap">
+      <div class="pulse-ring"></div>
+      <span style="font-size: 36px; position: relative; z-index: 1; filter: drop-shadow(0 2px 8px rgba(0,0,0,0.15));">🎵</span>
+    </div>
+    <div class="trigger-title">🎵 《记念》</div>
+    <div class="trigger-sub">点击打开歌词 · 送给我们的三年</div>
+  </div>
+</section>
+
+<!-- Lyrics Modal Overlay -->
+<div class="lyrics-overlay" id="lyricsOverlay">
+  <div class="lyrics-modal">
+    <div class="lyrics-header">
+      <div class="song-info">
+        <div class="song-name">记念</div>
+        <div class="song-artist">雷雨心 · 词：雷雨心 / 蒋思涵</div>
+      </div>
+      <button class="lyrics-close" id="lyricsClose">✕</button>
+    </div>
+    <div class="lyrics-body">
+      <div class="lyric-section-label">Verse 1</div>
+      <div class="lyric-line">时间一转眼就过去了三年</div>
+      <div class="lyric-line">一切在我心里开的好皎洁</div>
+      <div class="lyric-line">现在倒计时也不剩几天</div>
+      <div class="lyric-line">脚边的纸片 来不及去捡</div>
+
+      <div class="lyric-gap"></div>
+      <div class="lyric-section-label">Verse 2</div>
+      <div class="lyric-line">仿佛是快要冲破压力的茧</div>
+      <div class="lyric-line">离校后大家又各自熬夜</div>
+      <div class="lyric-line">早上的黑眼圈 课上的小困倦</div>
+      <div class="lyric-line">一天一天又一天</div>
+
+      <div class="lyric-gap"></div>
+      <div class="lyric-section-label">Chorus</div>
+      <div class="lyric-line highlight">我只想要拉住流年</div>
+      <div class="lyric-line highlight">好好的说声再见</div>
+      <div class="lyric-line">遗憾感谢都回不去昨天</div>
+      <div class="lyric-line highlight">我只想铭记这瞬间</div>
+      <div class="lyric-line highlight">我们一起走过的光年</div>
+      <div class="lyric-line">六月后光年成纪念</div>
+
+      <div class="lyric-gap"></div>
+      <div class="lyric-section-label">Verse 3</div>
+      <div class="lyric-line">这个班级太傲娇 什么课都不发言</div>
+      <div class="lyric-line">但是还是很温暖 同学之间的寒暄</div>
+      <div class="lyric-line">压着课本抄作业 考试上的看一眼</div>
+      <div class="lyric-line">现在想起来 会不会觉得很亲切</div>
+
+      <div class="lyric-gap"></div>
+      <div class="lyric-section-label">Chorus</div>
+      <div class="lyric-line highlight">我只想要拉住流年</div>
+      <div class="lyric-line highlight">好好的说声再见</div>
+      <div class="lyric-line">遗憾感谢都回不去昨天</div>
+      <div class="lyric-line highlight">我只想铭记这瞬间</div>
+      <div class="lyric-line highlight">我们一起走过的光年</div>
+      <div class="lyric-line">到达约定好的地点</div>
+
+      <div class="lyric-gap"></div>
+      <div class="lyric-section-label">Final Chorus</div>
+      <div class="lyric-line highlight">我只想要拉住流年</div>
+      <div class="lyric-line highlight">好好的说声再见</div>
+      <div class="lyric-line">在心中刻下你们的笑脸</div>
+      <div class="lyric-line highlight">当流星划过天边</div>
+      <div class="lyric-line highlight">许下我们的心愿</div>
+      <div class="lyric-line highlight">让现在成为永远</div>
+      <div class="lyric-line">永远 永远</div>
+
+      <div class="lyric-gap"></div>
+      <div class="lyric-section-label">Outro</div>
+      <div class="lyric-line" style="letter-spacing: 0.15em; font-size: 20px;">啦啦啦啦啦～</div>
+
+      <div class="lyric-gap"></div>
+      <div class="lyric-gap"></div>
+      <div class="lyric-line" style="text-align:center; color: var(--text-secondary); font-size: 15px; font-style: italic;">
+        —— 致我们的三年 ——
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Quote -->
+<section class="section quote-section" id="quote">
+  <div class="quote-mark reveal">"</div>
+  <p class="quote-text reveal reveal-delay-1">
+    三年很短，短到来不及说再见；<br>
+    三年很长，长到足以改变一生。
+  </p>
+  <p class="quote-author reveal reveal-delay-2">—— 致我们共同的三年</p>
+</section>
+
+<!-- Closing -->
+<section class="section closing" id="closing">
+  <h2 class="reveal">未来可期</h2>
+  <p class="closing-text reveal reveal-delay-1">
+    感谢每一位同学，让这三年如此特别。<br>
+    无论走到哪里，我们永远是同一个班。
+  </p>
+  <p class="closing-quote reveal reveal-delay-2">
+    世界很大，生活更大，<br>我们还会再次相遇。
+  </p>
+  <div class="year-badge reveal reveal-delay-3">2023 — 2026</div>
+</section>
+
+<script>
+// ── Hero: Per-character animation ──
+window.addEventListener('DOMContentLoaded', () => {
+  const badge = document.querySelector('.hero-badge');
+  const title = document.getElementById('heroTitle');
+  const sub = document.getElementById('heroSubtitle');
+
+  // Badge fly-in
+  setTimeout(() => {
+    badge.style.cssText = 'opacity:1;transform:translateY(0);transition:all 0.8s cubic-bezier(0.34,1.56,0.64,1)';
+  }, 200);
+
+  // Split title into character spans
+  if (title) {
+    const h1Clone = title.cloneNode(true);
+    h1Clone.style.opacity = '1';
+    h1Clone.style.transform = 'none';
+
+    // Process child nodes recursively
+    let charCounter = 0;
+    function wrapChars(node) {
+      if (node.nodeType === 3) { // Text node
+        const frag = document.createDocumentFragment();
+        node.textContent.split('').forEach((char) => {
+          const span = document.createElement('span');
+          span.className = 'hero-char';
+          span.textContent = char;
+          span.style.animationDelay = (0.4 + charCounter * 0.05) + 's';
+          charCounter++;
+          frag.appendChild(span);
+        });
+        return frag;
+      } else if (node.nodeType === 1) { // Element node
+        // Don't split text inside gradient-text — keep it whole
+        if (node.classList && node.classList.contains('gradient-text')) {
+          const wrapper = document.createElement('span');
+          wrapper.className = 'hero-char hero-char-gradient';
+          wrapper.style.animationDelay = (0.4 + charCounter * 0.05) + 's';
+          wrapper.appendChild(node.cloneNode(true));
+          charCounter++;
+          return wrapper;
+        }
+        const el = node.cloneNode(false);
+        Array.from(node.childNodes).forEach(child => {
+          el.appendChild(wrapChars(child));
+        });
+        return el;
+      }
+      return node.cloneNode(true);
+    }
+
+    const newContent = wrapChars(h1Clone);
+    title.innerHTML = '';
+    title.appendChild(newContent);
+    title.style.opacity = '1';
+    title.style.transform = 'none';
+  }
+
+  // Typewriter effect for subtitle
+  if (sub) {
+    const originalText = sub.textContent;
+    sub.textContent = '';
+    sub.style.opacity = '1';
+    sub.style.transform = 'none';
+    let charIndex = 0;
+    const typeSpeed = 45;
+    const cursor = document.createElement('span');
+    cursor.className = 'typewriter-cursor';
+    sub.appendChild(cursor);
+
+    function typeNext() {
+      if (charIndex < originalText.length) {
+        sub.insertBefore(document.createTextNode(originalText[charIndex]), cursor);
+        charIndex++;
+        setTimeout(typeNext, charIndex < 8 ? typeSpeed * 1.6 : typeSpeed);
+      } else {
+        cursor.style.display = 'none';
+      }
+    }
+    setTimeout(typeNext, 1200);
+  }
+});
+
+// ── Intersection Observer for reveals (enhanced) ──
+const observerOptions = { threshold: 0.12, rootMargin: '0px 0px -60px 0px' };
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('visible');
+      // Delayed children stagger
+      const delayed = entry.target.querySelectorAll('.reveal-delay-1, .reveal-delay-2, .reveal-delay-3, .reveal-delay-4');
+      delayed.forEach((child, i) => {
+        setTimeout(() => child.classList.add('visible'), i * 80);
+      });
+    }
+  });
+}, observerOptions);
+
+document.querySelectorAll('.reveal, .memory-card, .stat-card, .photo-frame, .reveal-left, .reveal-right, .reveal-scale').forEach(el => observer.observe(el));
+
+// ── Assign directional animation classes to memory cards ──
+document.querySelectorAll('.memory-card').forEach((card, i) => {
+  if (i % 2 === 0) {
+    card.classList.add('reveal-left');
+  } else {
+    card.classList.add('reveal-right');
+  }
+});
+
+// ── Nav highlight on scroll ──
+const sections = document.querySelectorAll('.section[id]');
+const navPills = document.querySelectorAll('.nav-pill');
+let lastScrollY = 0;
+
+window.addEventListener('scroll', () => {
+  // Progress bar
+  const winHeight = document.documentElement.scrollHeight - window.innerHeight;
+  const scrolled = (window.scrollY / winHeight) * 100;
+  document.getElementById('progressBar').style.width = scrolled + '%';
+
+  // Nav hide/show
+  const nav = document.getElementById('nav');
+  if (window.scrollY > lastScrollY && window.scrollY > 200) {
+    nav.classList.add('hidden');
+  } else {
+    nav.classList.remove('hidden');
+  }
+  lastScrollY = window.scrollY;
+
+  // Active nav pill + section highlight
+  let current = '';
+  sections.forEach(section => {
+    const top = section.offsetTop - 200;
+    if (window.scrollY >= top) current = section.id;
+    section.classList.remove('active-section');
+  });
+  navPills.forEach(pill => {
+    pill.classList.remove('active');
+    if (pill.getAttribute('href') === '#' + current) pill.classList.add('active');
+  });
+  const activeSection = document.getElementById(current);
+  if (activeSection) activeSection.classList.add('active-section');
+});
+
+// ── Particle System (Enhanced) ──
+const canvas = document.getElementById('particles');
+const ctx = canvas.getContext('2d');
+let particles = [];
+const PARTICLE_COUNT = 100;
+const PARTICLE_COLORS = [
+  'rgba(0, 113, 227, OP)',
+  'rgba(108, 92, 231, OP)',
+  'rgba(0, 199, 255, OP)',
+  'rgba(249, 202, 36, OP)',
+  'rgba(255, 107, 157, OP)'
+];
+
+function resize() {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+}
+resize();
+window.addEventListener('resize', resize);
+
+class Particle {
+  constructor() { this.reset(); }
+  reset() {
+    this.x = Math.random() * canvas.width;
+    this.y = Math.random() * canvas.height;
+    this.size = Math.random() * 2.5 + 0.5;
+    this.speedX = (Math.random() - 0.5) * 0.4;
+    this.speedY = (Math.random() - 0.5) * 0.4;
+    this.opacity = Math.random() * 0.25 + 0.04;
+    this.colorIdx = Math.floor(Math.random() * PARTICLE_COLORS.length);
+  }
+  update() {
+    this.x += this.speedX;
+    this.y += this.speedY;
+    if (this.x < -50 || this.x > canvas.width + 50 || this.y < -50 || this.y > canvas.height + 50) this.reset();
+  }
+  draw() {
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+    ctx.fillStyle = PARTICLE_COLORS[this.colorIdx].replace('OP', String(this.opacity));
+    ctx.fill();
+  }
+}
+
+for (let i = 0; i < PARTICLE_COUNT; i++) particles.push(new Particle());
+
+function animateParticles() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  particles.forEach(p => { p.update(); p.draw(); });
+
+  // Draw connections
+  for (let i = 0; i < particles.length; i++) {
+    for (let j = i + 1; j < particles.length; j++) {
+      const dx = particles[i].x - particles[j].x;
+      const dy = particles[i].y - particles[j].y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      if (dist < 150) {
+        ctx.beginPath();
+        ctx.moveTo(particles[i].x, particles[i].y);
+        ctx.lineTo(particles[j].x, particles[j].y);
+        ctx.strokeStyle = `rgba(0, 113, 227, ${0.05 * (1 - dist / 150)})`;
+        ctx.lineWidth = 0.5;
+        ctx.stroke();
+      }
+    }
+  }
+  requestAnimationFrame(animateParticles);
+}
+animateParticles();
+
+// ── Smooth anchor scroll ──
+document.querySelectorAll('.nav-pill').forEach(pill => {
+  pill.addEventListener('click', e => {
+    e.preventDefault();
+    const target = document.querySelector(pill.getAttribute('href'));
+    if (target) target.scrollIntoView({ behavior: 'smooth' });
+  });
+});
+
+// ── Confetti on reaching end ──
+const closingObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      launchConfetti();
+      closingObserver.disconnect();
+    }
+  });
+}, { threshold: 0.5 });
+closingObserver.observe(document.getElementById('closing'));
+
+function launchConfetti() {
+  const colors = ['#0071e3', '#6c5ce7', '#00c7ff', '#ff6b9d', '#fee140', '#ff9ff3', '#f9ca24', '#ffd700', '#a29bfe'];
+  for (let i = 0; i < 120; i++) {
+    const piece = document.createElement('div');
+    piece.className = 'confetti-piece';
+    const size = Math.random() * 10 + 4;
+    piece.style.cssText = `
+      left: ${Math.random() * 100}vw;
+      top: -20px;
+      width: ${size}px;
+      height: ${size * (Math.random() * 0.6 + 0.4)}px;
+      background: ${colors[Math.floor(Math.random() * colors.length)]};
+      border-radius: ${Math.random() > 0.5 ? '50%' : '2px'};
+      opacity: 1;
+      transition: all ${Math.random() * 2.5 + 2}s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    `;
+    document.body.appendChild(piece);
+    requestAnimationFrame(() => {
+      piece.style.transform = `translate(${(Math.random() - 0.5) * 300}px, ${window.innerHeight + 120}px) rotate(${Math.random() * 1080}deg)`;
+      piece.style.opacity = '0';
+    });
+    setTimeout(() => piece.remove(), 5000);
+  }
+}
+
+// ── Count-up animation for stats ──
+const statsObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      const statCards = entry.target.querySelectorAll('.stat-card');
+      statCards.forEach((card, i) => {
+        setTimeout(() => {
+          const numberEl = card.querySelector('.stat-number');
+          if (!numberEl || numberEl.dataset.counted) return;
+          numberEl.dataset.counted = 'true';
+
+          const unitEl = numberEl.querySelector('.stat-unit');
+          // Get the numeric part only (e.g. "50" from "50+")
+          const rawText = unitEl
+            ? numberEl.childNodes[0].textContent.trim()
+            : numberEl.textContent.trim();
+          const isNum = /^\d+$/.test(rawText);
+
+          if (isNum) {
+            const target = parseInt(rawText);
+            const duration = 1500;
+            const startTime = performance.now();
+            const unitHTML = unitEl ? unitEl.outerHTML : '';
+
+            function step(now) {
+              const elapsed = now - startTime;
+              const progress = Math.min(elapsed / duration, 1);
+              const eased = 1 - Math.pow(1 - progress, 3);
+              const current = Math.round(eased * target);
+
+              numberEl.innerHTML = current + unitHTML;
+              numberEl.classList.remove('counting');
+              void numberEl.offsetWidth;
+              numberEl.classList.add('counting');
+
+              if (progress < 1) {
+                requestAnimationFrame(step);
+              } else {
+                numberEl.innerHTML = target + unitHTML;
+              }
+            }
+            requestAnimationFrame(step);
+          } else {
+            // Non-numeric: scale-in pop animation
+            numberEl.style.opacity = '0';
+            numberEl.style.transform = 'scale(0.2) rotate(-10deg)';
+            numberEl.style.transition = 'all 0.7s cubic-bezier(0.34, 1.56, 0.64, 1)';
+            numberEl.style.display = 'inline-block';
+            requestAnimationFrame(() => {
+              numberEl.style.opacity = '1';
+              numberEl.style.transform = 'scale(1) rotate(0deg)';
+            });
+          }
+        }, i * 180);
+      });
+      statsObserver.disconnect();
+    }
+  });
+}, { threshold: 0.6 });
+const statsSection = document.getElementById('stats');
+if (statsSection) statsObserver.observe(statsSection);
+
+// ── Lyrics Modal ──
+const lyricsTrigger = document.getElementById('lyricsTrigger');
+const lyricsOverlay = document.getElementById('lyricsOverlay');
+const lyricsClose = document.getElementById('lyricsClose');
+
+lyricsTrigger.addEventListener('click', () => {
+  lyricsOverlay.classList.add('open');
+  document.body.style.overflow = 'hidden';
+  // Stagger animate each lyric line
+  const lines = lyricsOverlay.querySelectorAll('.lyric-line');
+  lines.forEach((line, i) => {
+    line.style.transitionDelay = (0.03 * i) + 's';
+  });
+  // Play 记念
+  jinianMusic.volume = 0.5;
+  jinianMusic.currentTime = 0;
+  jinianMusic.play().catch(() => {});
+  // Pause bgm while 记念 is playing
+  if (!bgMusic.paused) {
+    bgMusic.pause();
+    musicBtn.classList.remove("playing");
+    bgMusicWasPlaying = true;
+  }
+});
+
+lyricsClose.addEventListener('click', () => {
+  lyricsOverlay.classList.remove('open');
+  document.body.style.overflow = '';
+  // Reset delays
+  lyricsOverlay.querySelectorAll('.lyric-line').forEach(line => {
+    line.style.transitionDelay = '0s';
+  });
+  // Pause 记念
+  jinianMusic.pause();
+  jinianMusic.currentTime = 0;
+  // Resume bgm if it was playing before
+  if (bgMusicWasPlaying) {
+    bgMusic.play().then(() => {
+      musicBtn.classList.add("playing");
+    }).catch(() => {});
+    bgMusicWasPlaying = false;
+  }
+});
+
+lyricsOverlay.addEventListener('click', (e) => {
+  if (e.target === lyricsOverlay) {
+    lyricsClose.click();
+  }
+});
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && lyricsOverlay.classList.contains('open')) {
+    lyricsClose.click();
+  }
+});
+</script>
+<!-- Watermark -->
+<div class="watermark">RadiantSoul</div>
+
+<!-- Background Music -->
+<audio id="bgMusic" loop preload="auto">
+  <source src="bgm.mp3" type="audio/mpeg">
+</audio>
+<audio id="jinianMusic" preload="auto">
+  <source src="jinian.mp3" type="audio/mpeg">
+</audio>
+<button class="music-btn" id="musicBtn" title="播放/暂停背景音乐">
+  <span class="music-icon">🎵</span>
+  <div class="music-bars">
+    <div class="music-bar"></div>
+    <div class="music-bar"></div>
+    <div class="music-bar"></div>
+    <div class="music-bar"></div>
+  </div>
+</button>
+<div class="music-hint" id="musicHint">点击播放背景音乐 ♪</div>
+
+<script>
+// ── Background Music Control ──
+const bgMusic = document.getElementById("bgMusic");
+const musicBtn = document.getElementById("musicBtn");
+const musicHint = document.getElementById("musicHint");
+let musicStarted = false;
+let bgMusicWasPlaying = false;
+let hintTimer = null;
+
+// Show hint after 3 seconds
+hintTimer = setTimeout(() => {
+  musicHint.classList.add("show");
+  setTimeout(() => musicHint.classList.remove("show"), 4000);
+}, 3000);
+
+musicBtn.addEventListener("click", () => {
+  clearTimeout(hintTimer);
+  musicHint.classList.remove("show");
+  if (bgMusic.paused) {
+    bgMusic.volume = 0.3;
+    bgMusic.play().then(() => {
+      musicBtn.classList.add("playing");
+    }).catch(() => {});
+  } else {
+    bgMusic.pause();
+    musicBtn.classList.remove("playing");
+  }
+});
+</script>
+
+</body>
+</html>

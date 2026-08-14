@@ -1,0 +1,83 @@
+/* ============================================
+   设计变量 · Design Tokens
+   浅色 = 米白纸页 / 深色 = 近黑夜空
+   ============================================ */
+:root {
+  --bg: #FAF7F2;
+  --bg-soft: #F2EEE6;
+  --surface: #FFFDF9;
+  --surface-2: #FBF6EC;
+  --text: #1F1E1C;
+  --text-2: #6E6A62;
+  --text-3: #A29C90;
+  --line: rgba(58, 48, 34, 0.10);
+  --line-strong: rgba(58, 48, 34, 0.22);
+  --accent: #A63D2F;
+  --accent-soft: rgba(166, 61, 47, 0.08);
+  --accent-text: #8C3226;
+  --blue: #5B7DB1;
+  --blue-soft: rgba(91, 125, 177, 0.10);
+  --paper: #FBF8F1;
+  --paper-ink: #2B2822;
+  --paper-line: rgba(43, 40, 34, 0.14);
+  --shadow-sm: 0 1px 2px rgba(70, 56, 38, 0.04), 0 2px 8px rgba(70, 56, 38, 0.03);
+  --shadow-md: 0 2px 6px rgba(70, 56, 38, 0.04), 0 14px 34px rgba(70, 56, 38, 0.09);
+  --shadow-lg: 0 6px 18px rgba(70, 56, 38, 0.06), 0 26px 70px rgba(70, 56, 38, 0.16);
+  --card-hover-border: rgba(166, 61, 47, 0.22);
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --font-serif: "Songti SC", "STSong", "Noto Serif SC", "SimSun", Georgia, serif;
+  --font-sans: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB",
+    "Microsoft YaHei", "Segoe UI", Roboto, sans-serif;
+  --nav-h: 64px;
+  --maxw: 1200px;
+  /* 地图配色 */
+  --map-dot: rgba(31, 30, 28, 0.15);
+  --map-fill: rgba(31, 30, 28, 0.025);
+  --map-outline: rgba(31, 30, 28, 0.34);
+  --map-line: rgba(31, 30, 28, 0.20);
+}
+
+[data-theme="dark"] {
+  --bg: #0E0F12;
+  --bg-soft: #141519;
+  --surface: #181A1F;
+  --surface-2: #1E2026;
+  --text: #E8E6E1;
+  --text-2: #A5A29A;
+  --text-3: #6B6861;
+  --line: rgba(232, 230, 225, 0.10);
+  --line-strong: rgba(232, 230, 225, 0.20);
+  --accent: #C2593F;
+  --accent-soft: rgba(194, 89, 63, 0.13);
+  --accent-text: #D07A5F;
+  --blue: #7E9CC8;
+  --blue-soft: rgba(126, 156, 200, 0.12);
+  --paper: #211F1B;
+  --paper-ink: #E9E4D8;
+  --paper-line: rgba(233, 228, 216, 0.16);
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.25);
+  --shadow-md: 0 10px 36px rgba(0, 0, 0, 0.40);
+  --shadow-lg: 0 24px 70px rgba(0, 0, 0, 0.55);
+  --card-hover-border: rgba(194, 89, 63, 0.35);
+  /* 地图配色（夜空星图） */
+  --map-dot: rgba(232, 230, 225, 0.17);
+  --map-fill: rgba(232, 230, 225, 0.025);
+  --map-outline: rgba(232, 230, 225, 0.36);
+  --map-line: rgba(232, 230, 225, 0.15);
+}
+
+/* 主题切换时的平滑过渡 */
+html.theme-anim,
+html.theme-anim body,
+html.theme-anim * {
+  transition: background-color 0.4s var(--ease), color 0.4s var(--ease),
+    border-color 0.4s var(--ease), fill 0.4s var(--ease), stroke 0.4s var(--ease) !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
