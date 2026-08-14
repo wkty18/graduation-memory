@@ -21,7 +21,7 @@ GM.pages.timeline = {
         </div>
         <div class="tl-end reveal">
           <span class="tl-end__line"></span>
-          <span class="tl-end__text">未完待续 —— 故事还在各自的城市里继续</span>
+          <span class="tl-end__text">未完待续 —— 世界很大，生活更大，我们还会再次相遇</span>
         </div>` : GM.emptyState({ glyph: '时', title: '时间线还是空的。', desc: '去 data/timeline.js 写下第一个日子吧。' })}
       </div>
     </div>`;

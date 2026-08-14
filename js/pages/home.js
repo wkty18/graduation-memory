@@ -82,6 +82,7 @@ GM.pages.home = {
       <p class="copy-line reveal" data-delay="3">有人去了海边，有人留在故乡。</p>
       <p class="copy-gap reveal" data-delay="4">但我们都来自同一个地方。</p>
       <p class="copy-emph reveal" data-delay="4">2023级7班。</p>
+      <p class="copy-end reveal" data-delay="5">世界很大，生活更大，我们还会再次相遇。</p>
     </section>`;
   },
 

@@ -250,6 +250,13 @@
   color: var(--accent);
   margin-top: 1.4em;
 }
+.copy-end {
+  font-family: var(--font-serif);
+  font-size: clamp(17px, 2.8vw, 22px);
+  letter-spacing: 0.14em;
+  color: var(--text-2);
+  margin-top: 2.2em;
+}
 
 /* ---------- 迷你时间轴 ---------- */
 .mini-tl { padding: clamp(80px, 12vw, 150px) 0 0; }
@@ -905,7 +912,7 @@
 }
 .letter-sign { margin-top: 48px; text-align: right; }
 .letter-sign__from {
-  font-family: "Kaiti SC", "STKaiti", KaiTi, cursive;
+  font-family: "LXGW WenKai Lite", "Kaiti SC", "STKaiti", KaiTi, cursive;
   font-size: 19px;
   color: #8C3226;
 }
@@ -981,12 +988,22 @@
   letter-spacing: 0.06em;
 }
 
-/* 我们页：云端登录用户的编辑入口 */
+/* 我们页：云端登录用户的编辑入口 / 未登录的注册提示 */
 .classmates-edit-bar {
   text-align: center;
   margin-bottom: clamp(20px, 3vw, 34px);
 }
 .classmates-edit-btn { font-size: 13.5px; }
+.classmates-register-hint {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  justify-content: center;
+  font-size: 14px;
+  color: var(--text-2);
+  letter-spacing: 0.06em;
+}
 
 /* ---------- 个人页 ---------- */
 .profile-head { padding: calc(var(--nav-h) + 46px) 0 10px; }

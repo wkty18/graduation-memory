@@ -16,11 +16,17 @@ GM.pages.classmates = {
   render() {
     const cs = this.list();
     const cities = new Set(cs.map((c) => c.city)).size;
-    /* 云端登录用户可见的编辑入口 */
+    /* 云端登录用户可见的编辑入口；未登录显示注册提示 */
     const editEntry = (GM.cloud.ready && GM.cloud.signedIn)
       ? `<div class="container classmates-edit-bar">
           <a class="btn classmates-edit-btn" href="#/admin">＋ 添加 / 编辑同学名单</a>
-        </div>` : '';
+        </div>`
+      : (GM.cloud.ready
+        ? `<div class="container classmates-edit-bar">
+            <p class="classmates-register-hint">登录后可以编辑同学名单、给大家留言 ——
+              <a class="btn classmates-edit-btn" href="#/messages">注册 / 登录 →</a></p>
+          </div>`
+        : '');
     return `
     <div class="page classmates-page">
       <div class="page-head">
