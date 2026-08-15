@@ -39,6 +39,12 @@ GM.pages.about = {
         </section>
 
         <section class="about-sec reveal" data-delay="3">
+          <h2>关于作者</h2>
+          <p>作者：王凯跃 —— 2023级7班班长。</p>
+          <p>这个网站，是他送给七班的毕业礼物：把三年的照片、声音和没说出口的话，都收进一座线上纪念馆。很多年后，当大家散落在不同的城市，随时可以回来看看。</p>
+        </section>
+
+        <section class="about-sec reveal" data-delay="4">
           <h2>致谢</h2>
           <p>感谢三年里教过我们的每一位老师，感谢每一个在七班出现过的人。</p>
           <p class="about-em">我们曾经是 2023级7班。</p>

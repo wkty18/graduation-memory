@@ -18,6 +18,7 @@ GM.app = {
     GM.$('#footer-root').innerHTML = `
       <div class="footer__motto" id="footer-motto">我们曾经是 2023级7班。</div>
       <div class="footer__sub">2023 — 2026 · 七班毕业纪念馆 · 献给每一个去往远方的你</div>
+      <div class="footer__author">作者：王凯跃 · 2023级7班班长</div>
       <div class="footer__legal">本站为高中生涯纪念的非盈利网站 · 背景音乐仅用于同学间的回忆分享，版权归原作者所有，如涉侵权请联系删除</div>`;
 
     /* 隐蔽入口：页脚标语连点 5 次 → 管理员口令门 */

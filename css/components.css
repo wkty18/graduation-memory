@@ -299,6 +299,13 @@
 }
 .footer__motto:hover { color: var(--accent); }
 .footer__sub { color: var(--text-3); font-size: 13px; letter-spacing: 0.12em; }
+.footer__author {
+  color: var(--text-2);
+  font-size: 13px;
+  letter-spacing: 0.1em;
+  margin-top: 12px;
+  font-family: var(--font-serif);
+}
 .footer__legal {
   color: var(--text-3);
   opacity: 0.65;
