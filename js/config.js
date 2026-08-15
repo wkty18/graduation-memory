@@ -9,5 +9,15 @@
    ============================================ */
 window.GM_CONFIG = {
   supabaseUrl: 'https://qjxsawkakhlnoxeijnmx.supabase.co',
-  supabaseAnonKey: 'sb_publishable_acx84qWSW1ja3HSGhscRlQ_7Pog9u3i'
+  supabaseAnonKey: 'sb_publishable_acx84qWSW1ja3HSGhscRlQ_7Pog9u3i',
+
+  /* 背景音乐曲目表：
+     - file：上传到 Supabase Storage → audio 桶里的文件名（支持中文名）
+     - title：设置页里显示的歌名
+     - local：本地备用文件（audio 桶不可用时自动回退）
+     想加歌/换歌：把 mp3 传到 audio 桶，照格式加一行即可 */
+  musicTracks: [
+    { file: 'bgm.mp3', title: '毕业演讲 · 背景音乐', local: 'assets/archive/graduation-2026/bgm.mp3' },
+    { file: 'jinian.mp3', title: '纪念', local: 'assets/archive/graduation-2026/jinian.mp3' }
+  ]
 };

@@ -188,18 +188,25 @@ printf '%s' "信件正文……" | base64 -w0
   - 脚本会自动做 Douglas-Peucker 简化（容差 0.025°）、过滤南海诸岛与微小岛屿、保留全部 34 个省级行政区（含港澳台）
   - 地图投影为等距圆柱 + 纬度余弦校正（示意用途，非测绘精确）
 
-## 如何换背景音乐
+## 如何换 / 加背景音乐
 
-编辑 `js/components/music.js` 里的 `tracks`：
+音乐从 Supabase 云端流式播放（原文件不压缩），本地文件只作断网备用：
+
+1. 把 mp3 上传到 **Supabase → Storage → audio 桶**（文件名随意，支持中文）
+2. 编辑 `js/config.js` 的 `musicTracks`：
 
 ```js
-tracks: [
-  { id: 'new-song', src: 'assets/audio/新曲子.mp3', title: '曲子名称' },
+musicTracks: [
+  { file: 'bgm.mp3', title: '毕业演讲 · 背景音乐', local: 'assets/archive/graduation-2026/bgm.mp3' },
+  { file: '晴天钢琴版.mp3', title: '晴天（钢琴版）', local: '' },  // 新增一首：file=桶里文件名
 ]
 ```
 
-- 把音乐文件放进 `assets/` 下即可；默认关闭，用户点击右上角音符按钮才播放（符合浏览器自动播放策略）
-- 换好后记得把设置页的提示文案一并更新
+- `file`：audio 桶里的文件名（云端播放地址）
+- `title`：设置页显示的歌名
+- `local`：本地备用文件路径（云端不可用时自动回退；可留空）
+- 曲目数量不限，设置页自动出现全部歌曲可选
+- 默认自动播放（可在设置页关闭）；版权提示：公开网站请使用无版权音乐或自己演奏/录制的曲子
 
 ## 彩蛋
 

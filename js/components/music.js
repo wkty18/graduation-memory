@@ -9,12 +9,13 @@ GM.music = {
   audioBase: GM_CONFIG.supabaseUrl
     ? GM_CONFIG.supabaseUrl + '/storage/v1/object/public/audio/'
     : '',
-  tracks: [
-    { id: 'bgm', title: '毕业演讲 · 背景音乐',
-      local: 'assets/archive/graduation-2026/bgm.mp3' },
-    { id: 'jinian', title: '纪念',
-      local: 'assets/archive/graduation-2026/jinian.mp3' }
-  ],
+  /* 曲目来自 js/config.js 的 musicTracks（加歌只改配置） */
+  tracks: (GM_CONFIG.musicTracks || []).map((t, i) => ({
+    id: 't' + i,
+    file: t.file,
+    title: t.title,
+    local: t.local
+  })),
   idx: 0,
   playing: false,
   pending: false,
@@ -46,9 +47,9 @@ GM.music = {
     this.emit();
   },
 
-  /* 曲目播放地址：云端优先，无配置时用本地文件 */
+  /* 曲目播放地址：云端优先（支持中文文件名），无配置时用本地文件 */
   srcOf(t) {
-    return this.audioBase ? this.audioBase + t.id + '.mp3' : t.local;
+    return this.audioBase ? this.audioBase + encodeURIComponent(t.file) : t.local;
   },
 
   tryAutoplay() {
