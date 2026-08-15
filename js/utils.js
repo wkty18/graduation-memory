@@ -98,3 +98,19 @@ GM.avatar = (name, color) => {
 
 /* 同学头像：有自定义头像（管理员上传）用图片，否则用姓氏首字生成 */
 GM.avatarOf = (c) => (c && c.avatar) ? c.avatar : GM.avatar(c ? c.name : '?', c && c.color);
+
+/* 字符串安全化：Set/数组/对象等异常值 → 空串（防止界面出现 [object Set] 之类） */
+GM.str = (v) => (typeof v === 'string' || typeof v === 'number') ? String(v) : '';
+
+/* 同学数据清洗：所有文本字段强制为字符串（兼容历史脏数据） */
+GM.normClassmate = (c) => {
+  if (!c || typeof c !== 'object') return c;
+  ['name', 'gender', 'city', 'province', 'university', 'major', 'quote', 'avatar'].forEach((k) => {
+    if (c[k] !== undefined) c[k] = GM.str(c[k]);
+  });
+  if (c.tags !== undefined) c.tags = Array.isArray(c.tags) ? c.tags.map((t) => GM.str(t)).filter(Boolean) : [];
+  if (c.contact !== undefined && typeof c.contact === 'object') {
+    ['wechat', 'qq', 'email'].forEach((k) => { c.contact[k] = GM.str(c.contact[k]); });
+  }
+  return c;
+};

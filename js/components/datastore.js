@@ -68,10 +68,11 @@ GM.dataStore = {
     Object.values(this.SCOPES).forEach((s) => {
       const base = GM_DATA[s.baseKey] || [];
       const o = this._o[s.dataKey];
-      GM_DATA[s.dataKey] = base
+      const merged = base
         .filter((c) => !o.remove.includes(c.id))
         .map((c) => (o.update[c.id] ? Object.assign({}, c, o.update[c.id]) : c))
         .concat(o.add.filter((a) => !o.remove.includes(a.id)));
+      GM_DATA[s.dataKey] = s.dataKey === 'classmates' ? merged.map(GM.normClassmate) : merged;
     });
     GM.bus.emit('data:change');
   },

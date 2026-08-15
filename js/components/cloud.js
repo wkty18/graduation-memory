@@ -55,7 +55,7 @@ GM.cloud = {
     try {
       const { data: cs, error: e1 } = await this.client.from('classmates').select('id, data');
       if (!e1 && cs) {
-        GM_DATA.classmates = cs.map((r) => Object.assign({ id: r.id }, r.data || {}));
+        GM_DATA.classmates = cs.map((r) => GM.normClassmate(Object.assign({ id: r.id }, r.data || {})));
         GM_DATA.classmatesBase = GM_DATA.classmates;
       }
       const { data: ls, error: e2 } = await this.client.rpc('list_letters');

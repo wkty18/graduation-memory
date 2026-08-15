@@ -215,7 +215,7 @@ GM.pages.admin = {
           <div class="cm-row__main">
             <div class="cm-row__name">${GM.escapeHtml(c.name)}
               ${!c.coords ? '<span class="cm-row__warn">未标记位置</span>' : ''}</div>
-            <div class="cm-row__sub">${GM.escapeHtml([c.city, c.university].filter(Boolean).join(' · '))}</div>
+            <div class="cm-row__sub">${GM.escapeHtml([GM.str(c.city), GM.str(c.university)].filter(Boolean).join(' · '))}</div>
           </div>
           <div class="cm-row__ops">
             <button class="cm-op" data-op="edit" title="编辑">编辑</button>
@@ -251,7 +251,7 @@ GM.pages.admin = {
 
   editorHtml(c) {
     const colors = this.COLORS;
-    const cities = [...new Set((GM_DATA.classmates || []).map((x) => x.city).filter(Boolean))];
+    const cities = [...new Set((GM_DATA.classmates || []).map((x) => GM.str(x.city)).filter(Boolean))];
     return `
     <div class="cm-editor">
       <h3 class="cm-editor__title">${c ? '编辑 ' + GM.escapeHtml(c.name) : '新增同学'}</h3>
@@ -260,7 +260,7 @@ GM.pages.admin = {
           <input id="cm-name" value="${c ? GM.escapeHtml(c.name) : ''}" maxlength="12" placeholder="如：张三">
         </label>
         <label class="cm-field">城市
-          <input id="cm-city" value="${c ? GM.escapeHtml(c.city || '') : ''}" maxlength="14"
+          <input id="cm-city" value="${c ? GM.escapeHtml(GM.str(c.city)) : ''}" maxlength="14"
                  placeholder="如：北京（输入后自动识别位置）" list="cm-city-list">
           <datalist id="cm-city-list">${cities.map((x) => `<option value="${GM.escapeHtml(x)}">`).join('')}</datalist>
           <span class="cm-geo-status" id="cm-geo-status"></span>
