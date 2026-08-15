@@ -95,3 +95,6 @@ GM.avatar = (name, color) => {
   const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><defs><linearGradient id='a' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='${color}'/><stop offset='1' stop-color='${color}' stop-opacity='.72'/></linearGradient></defs><rect width='120' height='120' rx='60' fill='url(#a)'/><text x='60' y='83' font-family='Songti SC,STSong,SimSun,serif' font-size='54' fill='rgba(255,255,255,.93)' text-anchor='middle'>${ch}</text></svg>`;
   return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
 };
+
+/* 同学头像：有自定义头像（管理员上传）用图片，否则用姓氏首字生成 */
+GM.avatarOf = (c) => (c && c.avatar) ? c.avatar : GM.avatar(c ? c.name : '?', c && c.color);

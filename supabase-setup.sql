@@ -48,6 +48,16 @@ create table if not exists public.messages (
   user_id uuid references auth.users(id) on delete set null
 );
 
+-- 个人留言（同学个人页的留言墙）
+create table if not exists public.profile_messages (
+  id bigint generated always as identity primary key,
+  classmate_id text not null,
+  author text not null,
+  content text not null,
+  created_at timestamptz not null default now(),
+  user_id uuid references auth.users(id) on delete set null
+);
+
 -- 管理员名单（在此添加管理员 user_id）
 create table if not exists public.admins (
   user_id uuid primary key references auth.users(id) on delete cascade,
@@ -78,15 +88,19 @@ create trigger letters_touch before update on public.letters
 alter table public.classmates enable row level security;
 alter table public.letters enable row level security;
 alter table public.messages enable row level security;
+alter table public.profile_messages enable row level security;
 alter table public.admins enable row level security;
 
--- 同学：匿名读，登录可增删改（班级共享编辑）
+-- 同学：匿名读；仅管理员可增删改（班级成员只留言）
 drop policy if exists classmates_public_read on public.classmates;
 create policy classmates_public_read on public.classmates
   for select using (true);
 drop policy if exists classmates_auth_write on public.classmates;
-create policy classmates_auth_write on public.classmates
-  for all to authenticated using (true) with check (true);
+drop policy if exists classmates_admin_write on public.classmates;
+create policy classmates_admin_write on public.classmates
+  for all to authenticated
+  using (exists (select 1 from public.admins where user_id = auth.uid()))
+  with check (exists (select 1 from public.admins where user_id = auth.uid()));
 
 -- 信件：表本身不开放（匿名与登录用户都不能直接 SELECT）
 drop policy if exists letters_no_direct_read on public.letters;
@@ -106,6 +120,39 @@ create policy messages_public_read on public.messages
 drop policy if exists messages_auth_insert on public.messages;
 create policy messages_auth_insert on public.messages
   for insert to authenticated with check (true);
+
+-- 个人留言：匿名读，登录可发，管理员可删
+drop policy if exists profile_messages_public_read on public.profile_messages;
+create policy profile_messages_public_read on public.profile_messages
+  for select using (true);
+drop policy if exists profile_messages_auth_insert on public.profile_messages;
+create policy profile_messages_auth_insert on public.profile_messages
+  for insert to authenticated with check (true);
+drop policy if exists profile_messages_admin_delete on public.profile_messages;
+create policy profile_messages_admin_delete on public.profile_messages
+  for delete to authenticated
+  using (exists (select 1 from public.admins where user_id = auth.uid()));
+
+-- ------------------------------------------------------------
+-- 头像存储桶（公开读；仅管理员可写）
+-- ------------------------------------------------------------
+insert into storage.buckets (id, name, public) values ('avatars', 'avatars', true)
+  on conflict (id) do nothing;
+drop policy if exists avatars_public_read on storage.objects;
+create policy avatars_public_read on storage.objects
+  for select using (bucket_id = 'avatars');
+drop policy if exists avatars_admin_insert on storage.objects;
+create policy avatars_admin_insert on storage.objects
+  for insert to authenticated
+  with check (bucket_id = 'avatars' and exists (select 1 from public.admins where user_id = auth.uid()));
+drop policy if exists avatars_admin_update on storage.objects;
+create policy avatars_admin_update on storage.objects
+  for update to authenticated
+  using (bucket_id = 'avatars' and exists (select 1 from public.admins where user_id = auth.uid()));
+drop policy if exists avatars_admin_delete on storage.objects;
+create policy avatars_admin_delete on storage.objects
+  for delete to authenticated
+  using (bucket_id = 'avatars' and exists (select 1 from public.admins where user_id = auth.uid()));
 
 -- 管理员表：仅本人可见自己的记录
 drop policy if exists admins_self_read on public.admins;

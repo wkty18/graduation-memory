@@ -103,12 +103,12 @@ GM.pages.admin = {
       </div>
       <div class="container container--narrow">
 
-        <section class="set-sec reveal">
+        <section class="set-sec reveal" data-role="admin">
           <h2>数据总览</h2>
           <div id="admin-stats"></div>
         </section>
 
-        <section class="set-sec reveal" data-delay="1">
+        <section class="set-sec reveal" data-delay="1" data-role="admin">
           <h2>同学管理</h2>
           <p class="admin-sub">新增、编辑同学，并在地图上直接标记 TA 所在的位置。</p>
           <div id="admin-cm-list"></div>
@@ -211,7 +211,7 @@ GM.pages.admin = {
     <div class="cm-list">
       ${cs.map((c) => `
         <div class="cm-row" data-id="${GM.escapeHtml(c.id)}">
-          <img class="cm-row__avatar" src="${GM.avatar(c.name, c.color)}" alt="" loading="lazy">
+          <img class="cm-row__avatar" src="${GM.avatarOf(c)}" alt="" loading="lazy">
           <div class="cm-row__main">
             <div class="cm-row__name">${GM.escapeHtml(c.name)}
               ${!c.coords ? '<span class="cm-row__warn">未标记位置</span>' : ''}</div>
@@ -298,6 +298,16 @@ GM.pages.admin = {
             ${colors.map((col) => `
               <button type="button" class="cm-color ${(!c && col === colors[0]) || (c && c.color === col) ? 'active' : ''}"
                       data-color="${col}" style="background:${col}" aria-label="选择颜色 ${col}"></button>`).join('')}
+          </div>
+        </div>
+        <div class="cm-field cm-field--full">头像（可上传照片）
+          <div class="cm-avatar-row">
+            <img id="cm-avatar-preview" src="${GM.avatarOf(c)}" alt="头像预览">
+            <div class="cm-avatar-ops">
+              <label class="btn">上传图片<input type="file" id="cm-avatar-file" accept="image/*" style="display:none"></label>
+              <button type="button" class="btn" id="cm-avatar-reset">恢复默认头像</button>
+              <span class="cm-geo-status" id="cm-avatar-status"></span>
+            </div>
           </div>
         </div>
       </div>
@@ -503,7 +513,7 @@ GM.pages.admin = {
       const isAdmin = await GM.cloud.isAdmin();
       box.innerHTML = `
         <p class="admin-sub">已登录：<b>${GM.escapeHtml(user.email)}</b>（${isAdmin ? '管理员' : '班级成员'}）</p>
-        <p class="admin-sub">${isAdmin ? '你可以编辑同学与信件。' : '你可以编辑同学；信件仅管理员可编辑。'}</p>
+        <p class="admin-sub">${isAdmin ? '你可以编辑同学、信件与头像。' : '班级成员可以：在留言板留言、在同学个人页留言。同学名单与信件由管理员维护。'}</p>
         <button class="btn" id="cloud-signout">退出登录</button>`;
       GM.$('#cloud-signout').addEventListener('click', async () => {
         await GM.cloud.signOut();
@@ -594,14 +604,44 @@ GM.pages.admin = {
   /* ---------- 同学编辑器挂载 ---------- */
   openEditor(c) {
     this._edit = c
-      ? { id: c.id, coords: c.coords ? c.coords.slice() : null, color: c.color || this.COLORS[0], province: c.province || '', manual: false }
-      : { id: null, coords: null, color: this.COLORS[0], province: '', manual: false };
+      ? { id: c.id, coords: c.coords ? c.coords.slice() : null, color: c.color || this.COLORS[0], province: c.province || '', avatar: c.avatar || '', manual: false }
+      : { id: null, coords: null, color: this.COLORS[0], province: '', avatar: '', manual: false };
     GM.$('#admin-cm-editor').innerHTML = this.editorHtml(c);
     this.mountEditor();
     GM.$('#admin-cm-editor').scrollIntoView({ behavior: 'smooth', block: 'center' });
   },
 
   mountEditor() {
+    /* 头像上传 / 恢复默认 */
+    const avatarFile = GM.$('#cm-avatar-file');
+    const avatarPreview = GM.$('#cm-avatar-preview');
+    const avatarStatus = GM.$('#cm-avatar-status');
+    if (avatarFile) {
+      avatarFile.addEventListener('change', async () => {
+        const file = avatarFile.files && avatarFile.files[0];
+        if (!file) return;
+        if (file.size > 2 * 1024 * 1024) { avatarStatus.textContent = '图片超过 2MB，请压缩后再传。'; return; }
+        avatarStatus.textContent = '正在上传……';
+        try {
+          const url = await GM.cloud.uploadAvatar(file);
+          const old = this._edit.avatar;
+          this._edit.avatar = url;
+          avatarPreview.src = url;
+          avatarStatus.textContent = '已上传，保存后生效。';
+          if (old) GM.cloud.removeAvatar(old);
+        } catch (e) {
+          avatarStatus.textContent = '上传失败（仅管理员可上传头像）。';
+        }
+      });
+      GM.$('#cm-avatar-reset').addEventListener('click', () => {
+        const old = this._edit.avatar;
+        this._edit.avatar = '';
+        avatarPreview.src = GM.avatar(this._edit.name || GM.$('#cm-name').value || '?', this._edit.color);
+        avatarStatus.textContent = '已恢复默认头像，保存后生效。';
+        if (old) GM.cloud.removeAvatar(old);
+      });
+    }
+
     /* 颜色选择 */
     GM.$$('#cm-colors .cm-color').forEach((btn) => {
       btn.addEventListener('click', () => {
@@ -770,6 +810,7 @@ GM.pages.admin = {
       quote: GM.$('#cm-quote').value.trim(),
       tags: GM.$('#cm-tags').value.split(/[,，]/).map((s) => s.trim()).filter(Boolean),
       color: e.color,
+      avatar: e.avatar || '',
       contact: {
         wechat: GM.$('#cm-wechat').value.trim(),
         qq: GM.$('#cm-qq').value.trim(),

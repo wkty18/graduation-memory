@@ -22,6 +22,8 @@ body {
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
   transition: background-color 0.4s var(--ease), color 0.4s var(--ease);
+  /* 仿宋只有常规字重：禁用伪粗体，保持字形清秀 */
+  font-synthesis: none;
 }
 
 img, video { display: block; max-width: 100%; }

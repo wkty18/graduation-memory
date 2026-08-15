@@ -7,6 +7,7 @@
 GM.cloud = {
   ready: false,
   signedIn: false,
+  adminFlag: false,
   client: null,
 
   async init() {
@@ -19,6 +20,9 @@ GM.cloud = {
         s.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
         s.onload = resolve;
         s.onerror = () => reject(new Error('supabase js load failed'));
+        /* CDN 不可达时快速失败（8s），回退本地模式，不让站点挂起 */
+        const timer = setTimeout(() => { s.remove(); reject(new Error('supabase js timeout')); }, 8000);
+        s.onload = () => { clearTimeout(timer); resolve(); };
         document.head.appendChild(s);
       });
       this.client = window.supabase.createClient(url, key, {
@@ -27,14 +31,16 @@ GM.cloud = {
       this.ready = true;
 
       /* 登录状态同步（供控制台/页面入口判断） */
-      this.client.auth.onAuthStateChange((event, session) => {
+      this.client.auth.onAuthStateChange(async (event, session) => {
         this.signedIn = !!session;
+        this.adminFlag = this.signedIn ? await this.isAdmin() : false;
         GM.bus.emit('auth:change', this.signedIn);
       });
       try {
         const { data } = await this.client.auth.getUser();
         this.signedIn = !!(data && data.user);
-      } catch (e) { this.signedIn = false; }
+        this.adminFlag = this.signedIn ? await this.isAdmin() : false;
+      } catch (e) { this.signedIn = false; this.adminFlag = false; }
 
       await this.syncDown();
       return true;
@@ -117,6 +123,40 @@ GM.cloud = {
   async addMessage(author, content) {
     const { error } = await this.client.from('messages').insert({ author, content });
     if (error) throw error;
+  },
+
+  /* ---------- 个人留言（同学个人页） ---------- */
+  async fetchProfileMessages(classmateId) {
+    const { data, error } = await this.client
+      .from('profile_messages').select('id, author, content, created_at')
+      .eq('classmate_id', classmateId)
+      .order('id', { ascending: false }).limit(100);
+    if (error) throw error;
+    return data || [];
+  },
+
+  async addProfileMessage(classmateId, author, content) {
+    const { error } = await this.client
+      .from('profile_messages').insert({ classmate_id: classmateId, author, content });
+    if (error) throw error;
+  },
+
+  /* ---------- 头像上传（avatars 桶，公开读 / 管理员写） ---------- */
+  async uploadAvatar(file) {
+    const safe = (file.name || 'avatar').replace(/[^\w.\-]/g, '_');
+    const path = 'u-' + Date.now() + '-' + safe;
+    const { error } = await this.client.storage
+      .from('avatars').upload(path, file, { contentType: file.type || 'image/jpeg' });
+    if (error) throw error;
+    const { data } = this.client.storage.from('avatars').getPublicUrl(path);
+    return data.publicUrl;
+  },
+
+  async removeAvatar(url) {
+    try {
+      const m = String(url).match(/avatars\/([^?]+)/);
+      if (m) await this.client.storage.from('avatars').remove([decodeURIComponent(m[1])]);
+    } catch (e) { /* 清理失败不阻塞 */ }
   },
 
   /* ---------- 认证 ---------- */

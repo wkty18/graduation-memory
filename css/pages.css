@@ -912,7 +912,7 @@
 }
 .letter-sign { margin-top: 48px; text-align: right; }
 .letter-sign__from {
-  font-family: "LXGW WenKai Lite", "Kaiti SC", "STKaiti", KaiTi, cursive;
+  font-family: "Zhuque Fangsong", "Kaiti SC", "STKaiti", KaiTi, cursive;
   font-size: 19px;
   color: #8C3226;
 }
@@ -1649,6 +1649,63 @@
 .cm-field input:focus, .cm-field select:focus, .cm-field textarea:focus { outline: none; border-color: var(--accent); }
 .cm-field--full { grid-column: 1 / -1; }
 .cm-geo-status { font-size: 11.5px; color: var(--accent); letter-spacing: 0.03em; min-height: 16px; }
+
+/* ---------- 头像编辑器 ---------- */
+.cm-avatar-row { display: flex; align-items: center; gap: 16px; padding: 4px 0; }
+.cm-avatar-row img {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid var(--line);
+  flex-shrink: 0;
+}
+.cm-avatar-ops {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.cm-avatar-ops .btn { font-size: 13px; }
+
+/* ---------- 个人页留言墙 ---------- */
+.profile-msgs { margin-bottom: 8px; }
+.pmsg-compose {
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 14px;
+  background: var(--surface);
+  margin-bottom: 16px;
+}
+.pmsg-compose textarea {
+  width: 100%;
+  font: inherit;
+  color: var(--text);
+  background: var(--bg-soft);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 10px 13px;
+  resize: vertical;
+  line-height: 1.8;
+}
+.pmsg-compose textarea:focus { outline: none; border-color: var(--accent); }
+.pmsg-compose__bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 10px;
+  flex-wrap: wrap;
+}
+.pmsg-compose__who { font-size: 12px; color: var(--text-3); letter-spacing: 0.04em; }
+.pmsg-login {
+  border: 1px dashed var(--line-strong);
+  border-radius: 14px;
+  padding: 16px;
+  text-align: center;
+  margin-bottom: 16px;
+}
+.pmsg-login p { font-size: 13.5px; color: var(--text-2); letter-spacing: 0.05em; margin-bottom: 12px; }
 .cm-colors { display: flex; flex-wrap: wrap; gap: 8px; padding: 4px 0; }
 .cm-color {
   width: 26px;

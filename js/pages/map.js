@@ -302,7 +302,7 @@ GM.pages.map = {
         <div class="drawer-list">
           ${c.students.map((s, i) => `
             <a class="drawer-person" style="animation-delay:${i * 70}ms" href="#/classmates/${s.id}">
-              <img src="${GM.avatar(s.name, s.color)}" alt="${GM.escapeHtml(s.name)}" loading="lazy">
+              <img src="${GM.avatarOf(s)}" alt="${GM.escapeHtml(s.name)}" loading="lazy">
               <span class="dp-info">
                 <span class="dp-name">${GM.escapeHtml(s.name)}</span>
                 <span class="dp-uni">${GM.escapeHtml(s.university)} · ${GM.escapeHtml(s.major)}</span>
