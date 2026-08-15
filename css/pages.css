@@ -125,6 +125,11 @@
   display: inline-block;
   user-select: none;
   animation: sevenPulse 4.5s ease-in-out infinite;
+  /* 青春渐变：印章红 → 珊瑚 */
+  background: linear-gradient(130deg, var(--accent) 10%, var(--coral) 90%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
 }
 @keyframes sevenPulse {
   0%, 100% { transform: scale(1); }
@@ -987,6 +992,16 @@
   color: var(--accent-text);
   letter-spacing: 0.06em;
 }
+/* 青春多彩标签：按人物卡片轮流配色（珊瑚/薄荷/天蓝/印章红） */
+.person-card:nth-child(4n+1) .tag { background: var(--coral-soft); color: var(--coral); }
+.person-card:nth-child(4n+2) .tag { background: var(--mint-soft); color: var(--mint); }
+.person-card:nth-child(4n+3) .tag { background: var(--sky-soft); color: var(--sky); }
+.person-card:nth-child(4n+4) .tag { background: var(--accent-soft); color: var(--accent-text); }
+/* 个人页：同一人的多个标签也轮流配色 */
+.profile-tags .tag:nth-child(4n+1) { background: var(--coral-soft); color: var(--coral); }
+.profile-tags .tag:nth-child(4n+2) { background: var(--mint-soft); color: var(--mint); }
+.profile-tags .tag:nth-child(4n+3) { background: var(--sky-soft); color: var(--sky); }
+.profile-tags .tag:nth-child(4n+4) { background: var(--accent-soft); color: var(--accent-text); }
 
 /* 我们页：云端登录用户的编辑入口 / 未登录的注册提示 */
 .classmates-edit-bar {

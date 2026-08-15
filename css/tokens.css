@@ -17,6 +17,13 @@
   --accent-text: #8C3226;
   --blue: #5B7DB1;
   --blue-soft: rgba(91, 125, 177, 0.10);
+  /* 青春色系（白天模式点缀） */
+  --coral: #E8765A;
+  --coral-soft: rgba(232, 118, 90, 0.13);
+  --mint: #4E9E7F;
+  --mint-soft: rgba(78, 158, 127, 0.14);
+  --sky: #5E9BD6;
+  --sky-soft: rgba(94, 155, 214, 0.13);
   --paper: #FBF8F1;
   --paper-ink: #2B2822;
   --paper-line: rgba(43, 40, 34, 0.14);
@@ -52,6 +59,13 @@
   --accent-text: #D07A5F;
   --blue: #7E9CC8;
   --blue-soft: rgba(126, 156, 200, 0.12);
+  /* 青春色系（深色模式提亮） */
+  --coral: #F0927C;
+  --coral-soft: rgba(240, 146, 124, 0.15);
+  --mint: #7EC8AE;
+  --mint-soft: rgba(126, 200, 174, 0.14);
+  --sky: #8AB8E8;
+  --sky-soft: rgba(138, 184, 232, 0.14);
   --paper: #211F1B;
   --paper-ink: #E9E4D8;
   --paper-line: rgba(233, 228, 216, 0.16);
