@@ -24,14 +24,16 @@ GM.music = {
 
   init() {
     this.audio = new Audio();
-    this.audio.loop = true;
+    this.audio.loop = false; /* 列表循环：单曲结束自动切下一首 */
     this.audio.preload = 'none';
     this.idx = parseInt(localStorage.getItem('gm-music-track') || '0', 10) || 0;
+    this.audio.volume = Math.min(1, Math.max(0, parseFloat(localStorage.getItem('gm-music-volume') || '1')));
 
     this.audio.addEventListener('loadstart', () => { this.loading = true; this.emit(); });
     this.audio.addEventListener('canplay', () => { this.loading = false; this.emit(); });
     this.audio.addEventListener('playing', () => { this.loading = false; this.emit(); });
-    this.audio.addEventListener('ended', () => this.setState(false));
+    this.audio.addEventListener('timeupdate', () => this.emitTime());
+    this.audio.addEventListener('ended', () => this.next());
     this.audio.addEventListener('error', () => this.onAudioError());
 
     /* Lightbox 打开时暂停背景音乐，避免声音打架 */
@@ -158,6 +160,46 @@ GM.music = {
     this.emit();
   },
 
+  next() {
+    this.idx = (this.idx + 1) % this.tracks.length;
+    localStorage.setItem('gm-music-track', String(this.idx));
+    this._fallback = false;
+    if (this.playing) this.play();
+    this.emit();
+  },
+
+  prev() {
+    this.idx = (this.idx - 1 + this.tracks.length) % this.tracks.length;
+    localStorage.setItem('gm-music-track', String(this.idx));
+    this._fallback = false;
+    if (this.playing) this.play();
+    this.emit();
+  },
+
+  seek(t) {
+    if (!this.audio || !isFinite(t)) return;
+    try { this.audio.currentTime = Math.min(Math.max(0, t), this.audio.duration || t); } catch (e) { /* 未加载时忽略 */ }
+  },
+
+  setVolume(v) {
+    const vol = Math.min(1, Math.max(0, v));
+    if (this.audio) this.audio.volume = vol;
+    localStorage.setItem('gm-music-volume', String(vol));
+    this.emit();
+  },
+
+  /* 进度事件节流广播 */
+  emitTime() {
+    if (!this.audio) return;
+    const now = Date.now();
+    if (this._lastTime && now - this._lastTime < 500) return;
+    this._lastTime = now;
+    GM.bus.emit('music:time', {
+      time: this.audio.currentTime || 0,
+      duration: this.audio.duration || 0
+    });
+  },
+
   /* 设置页开关：自动播放 */
   setAutoplay(on) {
     this.autoplayEnabled = on;
@@ -174,8 +216,11 @@ GM.music = {
     GM.bus.emit('music:change', {
       playing: this.playing,
       track: this.current(),
+      idx: this.idx,
+      total: this.tracks.length,
       pending: this.pending,
-      loading: this.loading
+      loading: this.loading,
+      volume: this.audio ? this.audio.volume : 1
     });
   }
 };

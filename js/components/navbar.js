@@ -82,8 +82,8 @@ GM.navbar = {
     GM.$('#theme-toggle').addEventListener('click', () => GM.theme.toggle());
     GM.bus.on('theme:change', () => this.syncThemeIcon());
 
-    /* 音乐按钮 */
-    GM.$('#music-toggle').addEventListener('click', () => GM.music.toggle());
+    /* 音乐按钮：打开音乐控制台 */
+    GM.$('#music-toggle').addEventListener('click', () => GM.musicPanel.toggle());
     GM.bus.on('music:change', () => this.syncMusicIcon());
     this.syncMusicIcon();
 

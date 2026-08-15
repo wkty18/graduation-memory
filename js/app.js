@@ -6,6 +6,7 @@ GM.app = {
     GM.theme.init();
     GM.navbar.init();
     GM.music.init();
+    GM.musicPanel.init();
     GM.stars.init();
     GM.sunlight.init();
 
