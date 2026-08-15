@@ -62,6 +62,8 @@ GM.music = {
     const start = () => {
       if (this.pending && !this.playing) {
         this.pending = false;
+        const t = this.current();
+        if (!this.audio.src) this.audio.src = t.src;
         this.audio.play().then(() => this.setState(true)).catch(() => {});
         this.emit();
       }
