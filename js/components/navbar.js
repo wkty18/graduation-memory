@@ -6,6 +6,7 @@ GM.navbar = {
     { path: '/', label: '首页' },
     { path: '/map', label: '地图' },
     { path: '/album', label: '相册' },
+    { action: 'speech', label: '演讲' },
     { path: '/letters', label: '信件' },
     { path: '/classmates', label: '我们' },
     { path: '/messages', label: '留言' },
@@ -13,12 +14,26 @@ GM.navbar = {
     { path: '/about', label: '关于' }
   ],
 
+  /* 毕业演讲原始记录（Lightbox 内嵌打开，不离开纪念馆） */
+  openSpeech() {
+    GM.lightbox.open([{
+      type: 'iframe',
+      src: 'assets/archive/graduation-2026/index.html',
+      title: '毕业演讲 · 原始记录',
+      date: '2026.06.09',
+      place: '毕业典礼',
+      desc: '典礼当天播放的章节页，原样保存在这里。'
+    }], 0);
+  },
+
   init() {
     this.render();
     const menu = GM.$('#mobile-menu-root');
     menu.classList.add('mobile-menu');
     menu.innerHTML = this.links
-      .map((l) => `<a href="#${l.path}" data-mlink="${l.path}">${l.label}</a>`)
+      .map((l) => l.action
+        ? `<a href="#" data-maction="${l.action}">${l.label}</a>`
+        : `<a href="#${l.path}" data-mlink="${l.path}">${l.label}</a>`)
       .join('');
     this.bind();
   },
@@ -32,7 +47,9 @@ GM.navbar = {
             <span class="seven">7</span><span>2023级7班</span>
           </a>
           <div class="nav__links">
-            ${this.links.map((l) => `<a class="nav__link" data-path="${l.path}" href="#${l.path}">${l.label}</a>`).join('')}
+            ${this.links.map((l) => l.action
+              ? `<a class="nav__link" href="#" data-action="${l.action}">${l.label}</a>`
+              : `<a class="nav__link" data-path="${l.path}" href="#${l.path}">${l.label}</a>`).join('')}
           </div>
           <div class="nav__right">
             <button class="icon-btn" id="music-toggle" aria-label="播放音乐" title="播放 / 暂停背景音乐">
@@ -70,9 +87,20 @@ GM.navbar = {
     GM.bus.on('music:change', () => this.syncMusicIcon());
     this.syncMusicIcon();
 
+    /* 毕业演讲：顶部栏打开原始记录（Lightbox 内嵌） */
+    GM.$('[data-action="speech"]').addEventListener('click', (e) => {
+      e.preventDefault();
+      this.openSpeech();
+    });
+
     /* 移动端菜单 */
     const menu = GM.$('#mobile-menu-root');
     const burger = GM.$('#nav-burger');
+    const closeMenu = () => {
+      menu.classList.remove('open');
+      burger.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>';
+      GM.unlockScroll();
+    };
     burger.addEventListener('click', () => {
       const open = menu.classList.toggle('open');
       burger.innerHTML = open
@@ -80,11 +108,12 @@ GM.navbar = {
         : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>';
       GM[open ? 'lockScroll' : 'unlockScroll']();
     });
-    GM.$$('[data-mlink]', menu).forEach((a) =>
-      a.addEventListener('click', () => {
-        menu.classList.remove('open');
-        burger.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>';
-        GM.unlockScroll();
+    GM.$$('[data-mlink]', menu).forEach((a) => a.addEventListener('click', closeMenu));
+    GM.$$('[data-maction="speech"]', menu).forEach((a) =>
+      a.addEventListener('click', (e) => {
+        e.preventDefault();
+        closeMenu();
+        this.openSpeech();
       })
     );
 
@@ -108,6 +137,8 @@ GM.navbar = {
     on.style.display = playing ? 'none' : '';
     eq.style.display = playing ? '' : 'none';
     GM.$('#music-toggle').title = playing ? '暂停背景音乐' : '播放背景音乐';
+    /* 自动播放被拦截时：音符按钮呼吸提示 */
+    GM.$('#music-toggle').classList.toggle('pending', !playing && GM.music.pending);
   },
 
   syncActive() {

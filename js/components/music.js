@@ -11,6 +11,7 @@ GM.music = {
   ],
   idx: 0,
   playing: false,
+  pending: false,
   audio: null,
 
   init() {
@@ -26,7 +27,49 @@ GM.music = {
 
     /* Lightbox 打开时暂停背景音乐，避免声音打架 */
     GM.bus.on('lightbox:open', () => this.pause());
+
+    /* 自动播放（浏览器策略内做到最好）：
+       1. 直接尝试（若浏览器信任本站，立即播放）
+       2. 被拦截 → 等用户第一次点击/按键时播放
+       3. 默认开启，可在设置页关闭 */
+    this.autoplayEnabled = localStorage.getItem('gm-music-autoplay') !== 'off';
+    if (this.autoplayEnabled) this.tryAutoplay();
+
     this.emit();
+  },
+
+  tryAutoplay() {
+    const t = this.current();
+    this.audio.src = t.src;
+    this.audio.play().then(() => {
+      this.setState(true);
+      this.pending = false;
+    }).catch(() => {
+      this.pending = true;
+      this.bindFirstGesture();
+      this.emit();
+      /* 等开屏动画结束后再提示 */
+      setTimeout(() => {
+        if (this.pending && !this.playing) GM.toast('点一下右上角音符，开启背景音乐', 4500);
+      }, 3800);
+    });
+  },
+
+  /* 用户第一次交互时开始播放（浏览器自动播放策略允许） */
+  bindFirstGesture() {
+    if (this._gestureBound) return;
+    this._gestureBound = true;
+    const start = () => {
+      if (this.pending && !this.playing) {
+        this.pending = false;
+        this.audio.play().then(() => this.setState(true)).catch(() => {});
+        this.emit();
+      }
+      window.removeEventListener('pointerdown', start);
+      window.removeEventListener('keydown', start);
+    };
+    window.addEventListener('pointerdown', start);
+    window.addEventListener('keydown', start);
   },
 
   current() { return this.tracks[this.idx] || this.tracks[0]; },
@@ -39,7 +82,10 @@ GM.music = {
     if (!this.audio) return;
     const t = this.current();
     if (this.audio.src !== new URL(t.src, location.href).href) this.audio.src = t.src;
-    this.audio.play().then(() => this.setState(true)).catch(() => {
+    this.audio.play().then(() => {
+      this.pending = false;
+      this.setState(true);
+    }).catch(() => {
       /* 浏览器拦截或文件缺失 */
       this.setState(false);
       GM.toast('点击音乐按钮开始播放。');
@@ -66,7 +112,14 @@ GM.music = {
     this.emit();
   },
 
+  /* 设置页开关：自动播放 */
+  setAutoplay(on) {
+    this.autoplayEnabled = on;
+    localStorage.setItem('gm-music-autoplay', on ? 'on' : 'off');
+    if (on && !this.playing) this.tryAutoplay();
+  },
+
   emit() {
-    GM.bus.emit('music:change', { playing: this.playing, track: this.current() });
+    GM.bus.emit('music:change', { playing: this.playing, track: this.current(), pending: this.pending });
   }
 };

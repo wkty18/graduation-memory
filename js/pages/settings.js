@@ -46,7 +46,7 @@ GM.pages.settings = {
 
         <section class="set-sec reveal" data-delay="1">
           <h2>背景音乐</h2>
-          <p class="set-sec__desc">默认关闭，点击右上角音符按钮播放。当前为占位曲目，换新曲子请看 README。</p>
+          <p class="set-sec__desc">当前为占位曲目，换新曲子请看 README。</p>
           <div class="set-tracks">
             ${GM.music.tracks.map((t, i) => `
               <button class="set-track ${i === GM.music.idx ? 'active' : ''}" data-track="${t.id}">
@@ -54,6 +54,14 @@ GM.pages.settings = {
                 <span class="set-track__title">${GM.escapeHtml(t.title)}</span>
               </button>`).join('')}
           </div>
+          <label class="set-row">
+            <span class="set-row__text">
+              <span class="set-row__name">自动播放背景音乐</span>
+              <span class="set-row__desc">打开网站后自动尝试播放；若浏览器拦截，会在你第一次点击页面后开始</span>
+            </span>
+            <input type="checkbox" id="set-music-autoplay" ${GM.music.autoplayEnabled !== false ? 'checked' : ''}>
+            <span class="switch" aria-hidden="true"></span>
+          </label>
         </section>
 
         <section class="set-sec reveal" data-delay="2">
@@ -98,6 +106,12 @@ GM.pages.settings = {
         GM.music.select(btn.dataset.track);
         GM.$$('.set-track').forEach((b) => b.classList.toggle('active', b.dataset.track === GM.music.tracks[GM.music.idx].id));
       });
+    });
+
+    /* 自动播放开关 */
+    GM.$('#set-music-autoplay').addEventListener('change', (e) => {
+      GM.music.setAutoplay(e.target.checked);
+      GM.toast(e.target.checked ? '已开启自动播放。' : '已关闭自动播放。');
     });
   }
 };
