@@ -299,6 +299,17 @@
 }
 .footer__motto:hover { color: var(--accent); }
 .footer__sub { color: var(--text-3); font-size: 13px; letter-spacing: 0.12em; }
+.footer__legal {
+  color: var(--text-3);
+  opacity: 0.65;
+  font-size: 11.5px;
+  letter-spacing: 0.06em;
+  margin-top: 16px;
+  max-width: 640px;
+  margin-left: auto;
+  margin-right: auto;
+  line-height: 1.9;
+}
 
 /* ---------- Lightbox ---------- */
 .lightbox {

@@ -18,6 +18,8 @@ window.GM_CONFIG = {
      想加歌/换歌：把 mp3 传到 audio 桶，照格式加一行即可 */
   musicTracks: [
     { file: 'bgm.mp3', title: '毕业演讲 · 背景音乐', local: 'assets/archive/graduation-2026/bgm.mp3' },
-    { file: 'jinian.mp3', title: '纪念', local: 'assets/archive/graduation-2026/jinian.mp3' }
+    { file: 'jinian.mp3', title: '纪念', local: 'assets/archive/graduation-2026/jinian.mp3' },
+    { file: 'dengnixiake.mp3', title: '等你下课', local: '' },
+    { file: 'yujian.mp3', title: '遇见', local: '' }
   ]
 };
