@@ -134,6 +134,20 @@ create policy profile_messages_admin_delete on public.profile_messages
   using (exists (select 1 from public.admins where user_id = auth.uid()));
 
 -- ------------------------------------------------------------
+-- 音乐存储桶（公开读；背景音乐线上流式播放）
+-- 用法：Storage → audio 桶 → 上传 bgm.mp3 / jinian.mp3（原文件不压缩）
+-- ------------------------------------------------------------
+insert into storage.buckets (id, name, public) values ('audio', 'audio', true)
+  on conflict (id) do nothing;
+drop policy if exists audio_public_read on storage.objects;
+create policy audio_public_read on storage.objects
+  for select using (bucket_id = 'audio');
+drop policy if exists audio_admin_insert on storage.objects;
+create policy audio_admin_insert on storage.objects
+  for insert to authenticated
+  with check (bucket_id = 'audio' and exists (select 1 from public.admins where user_id = auth.uid()));
+
+-- ------------------------------------------------------------
 -- 头像存储桶（公开读；仅管理员可写）
 -- ------------------------------------------------------------
 insert into storage.buckets (id, name, public) values ('avatars', 'avatars', true)

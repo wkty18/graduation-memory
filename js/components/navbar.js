@@ -136,9 +136,11 @@ GM.navbar = {
     const playing = GM.music.playing;
     on.style.display = playing ? 'none' : '';
     eq.style.display = playing ? '' : 'none';
-    GM.$('#music-toggle').title = playing ? '暂停背景音乐' : '播放背景音乐';
-    /* 自动播放被拦截时：音符按钮呼吸提示 */
-    GM.$('#music-toggle').classList.toggle('pending', !playing && GM.music.pending);
+    GM.$('#music-toggle').title = GM.music.loading ? '正在加载音乐…'
+      : (playing ? '暂停背景音乐' : '播放背景音乐');
+    /* 自动播放被拦截时：音符按钮呼吸提示；加载中：轻微脉动 */
+    GM.$('#music-toggle').classList.toggle('pending', !playing && GM.music.pending && !GM.music.loading);
+    GM.$('#music-toggle').classList.toggle('loading', GM.music.loading);
   },
 
   syncActive() {

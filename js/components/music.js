@@ -1,17 +1,24 @@
 /* ============================================
    站点背景音乐
-   - 默认关闭，用户主动点击才播放（浏览器自动播放策略）
-   - 曲目列表在此维护：想换新曲子时，
-     把音乐文件放进 assets/ 下，替换下方 src 即可
+   - 云端优先：从 Supabase audio 存储桶流式播放（原文件不压缩）
+     文件命名约定：bgm.mp3 / jinian.mp3（上传到 Storage → audio 桶）
+   - 本地备用：云端不可用时自动切换 assets/ 下的本地文件
+   - 默认关闭，用户主动点击才播放；支持首手势自动播放（见 tryAutoplay）
    ============================================ */
 GM.music = {
+  audioBase: GM_CONFIG.supabaseUrl
+    ? GM_CONFIG.supabaseUrl + '/storage/v1/object/public/audio/'
+    : '',
   tracks: [
-    { id: 'bgm', src: 'assets/archive/graduation-2026/bgm.mp3', title: '毕业演讲 · 背景音乐（占位）' },
-    { id: 'jinian', src: 'assets/archive/graduation-2026/jinian.mp3', title: '纪念（占位）' }
+    { id: 'bgm', title: '毕业演讲 · 背景音乐',
+      local: 'assets/archive/graduation-2026/bgm.mp3' },
+    { id: 'jinian', title: '纪念',
+      local: 'assets/archive/graduation-2026/jinian.mp3' }
   ],
   idx: 0,
   playing: false,
   pending: false,
+  loading: false,
   audio: null,
 
   init() {
@@ -19,11 +26,12 @@ GM.music = {
     this.audio.loop = true;
     this.audio.preload = 'none';
     this.idx = parseInt(localStorage.getItem('gm-music-track') || '0', 10) || 0;
+
+    this.audio.addEventListener('loadstart', () => { this.loading = true; this.emit(); });
+    this.audio.addEventListener('canplay', () => { this.loading = false; this.emit(); });
+    this.audio.addEventListener('playing', () => { this.loading = false; this.emit(); });
     this.audio.addEventListener('ended', () => this.setState(false));
-    this.audio.addEventListener('error', () => {
-      this.setState(false);
-      GM.toast('这首曲子暂时播放不了。');
-    });
+    this.audio.addEventListener('error', () => this.onAudioError());
 
     /* Lightbox 打开时暂停背景音乐，避免声音打架 */
     GM.bus.on('lightbox:open', () => this.pause());
@@ -38,9 +46,15 @@ GM.music = {
     this.emit();
   },
 
+  /* 曲目播放地址：云端优先，无配置时用本地文件 */
+  srcOf(t) {
+    return this.audioBase ? this.audioBase + t.id + '.mp3' : t.local;
+  },
+
   tryAutoplay() {
+    this._wantPlay = true;
     const t = this.current();
-    this.audio.src = t.src;
+    this.audio.src = this.srcOf(t);
     this.audio.play().then(() => {
       this.setState(true);
       this.pending = false;
@@ -62,8 +76,9 @@ GM.music = {
     const start = () => {
       if (this.pending && !this.playing) {
         this.pending = false;
+        this._wantPlay = true;
         const t = this.current();
-        if (!this.audio.src) this.audio.src = t.src;
+        if (!this.audio.src) this.audio.src = this.srcOf(t);
         this.audio.play().then(() => this.setState(true)).catch(() => {});
         this.emit();
       }
@@ -74,6 +89,33 @@ GM.music = {
     window.addEventListener('keydown', start);
   },
 
+  /* 云端失败 → 自动回退本地文件 */
+  onAudioError() {
+    this.loading = false;
+    const t = this.current();
+    const cloudUrl = this.audioBase ? new URL(this.srcOf(t), location.href).href : null;
+    const usingCloud = cloudUrl && this.audio.src === cloudUrl;
+    if (usingCloud && t.local) {
+      this._fallback = true;
+      this.audio.src = t.local;
+      this.audio.load();
+      if (this._wantPlay) {
+        /* 错误回调是异步时机，可能已失去用户激活上下文：
+           重新等待下一次点击/按键后播放 */
+        this.pending = true;
+        this._gestureBound = false;
+        this.bindFirstGesture();
+        GM.toast('已切换到本地音乐，点一下页面开始播放。');
+      } else {
+        GM.toast('云端音乐不可用，已切换到本地音乐。');
+      }
+    } else {
+      this.setState(false);
+      GM.toast('这首曲子暂时播放不了。');
+    }
+    this.emit();
+  },
+
   current() { return this.tracks[this.idx] || this.tracks[0]; },
 
   toggle() {
@@ -82,8 +124,12 @@ GM.music = {
 
   play() {
     if (!this.audio) return;
+    this._wantPlay = true;
     const t = this.current();
-    if (this.audio.src !== new URL(t.src, location.href).href) this.audio.src = t.src;
+    const want = this.srcOf(t);
+    if (this.audio.src !== new URL(want, location.href).href) this.audio.src = want;
+    this.loading = true;
+    this.emit();
     this.audio.play().then(() => {
       this.pending = false;
       this.setState(true);
@@ -96,6 +142,7 @@ GM.music = {
 
   pause() {
     if (!this.audio) return;
+    this._wantPlay = false;
     this.audio.pause();
     this.setState(false);
   },
@@ -105,12 +152,8 @@ GM.music = {
     if (i < 0) return;
     this.idx = i;
     localStorage.setItem('gm-music-track', String(i));
+    this._fallback = false;
     if (this.playing) this.play();
-    this.emit();
-  },
-
-  setState(p) {
-    this.playing = p;
     this.emit();
   },
 
@@ -121,7 +164,17 @@ GM.music = {
     if (on && !this.playing) this.tryAutoplay();
   },
 
+  setState(p) {
+    this.playing = p;
+    this.emit();
+  },
+
   emit() {
-    GM.bus.emit('music:change', { playing: this.playing, track: this.current(), pending: this.pending });
+    GM.bus.emit('music:change', {
+      playing: this.playing,
+      track: this.current(),
+      pending: this.pending,
+      loading: this.loading
+    });
   }
 };
