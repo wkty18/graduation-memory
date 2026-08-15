@@ -1770,3 +1770,65 @@
   .cm-grid { grid-template-columns: 1fr; }
   .cm-row__ops { flex-direction: column; }
 }
+
+/* ============================================
+   移动端适配增强
+   ============================================ */
+
+/* 刘海屏安全区：导航高度含顶部安全区 */
+.nav { padding-top: env(safe-area-inset-top, 0px); }
+@supports (padding-top: env(safe-area-inset-top)) {
+  :root { --nav-h: calc(64px + env(safe-area-inset-top, 0px)); }
+}
+.back-top { bottom: calc(26px + env(safe-area-inset-bottom, 0px)); }
+.footer { padding-bottom: calc(44px + env(safe-area-inset-bottom, 0px)); }
+.toast { bottom: calc(42px + env(safe-area-inset-bottom, 0px)); }
+.music-panel { bottom: calc(28px + env(safe-area-inset-bottom, 0px)); }
+.mobile-menu { padding-bottom: calc(40px + env(safe-area-inset-bottom, 0px)); }
+.lightbox__caption { padding-bottom: calc(26px + env(safe-area-inset-bottom, 0px)); }
+
+@media (max-width: 860px) {
+  /* 触控目标 ≥ 44px */
+  .btn { padding: 13px 26px; }
+  .album-cat { padding: 11px 22px; font-size: 14px; }
+  .icon-btn { width: 42px; height: 42px; }
+  .map-zoom-btn { width: 44px; height: 44px; }
+  .cm-op { padding: 8px 16px; font-size: 13px; }
+  .tl-link { padding: 9px 18px; font-size: 13.5px; }
+  .drawer-close { width: 42px; height: 42px; }
+  .lightbox__nav { width: 52px; height: 52px; }
+  /* 输入框 ≥16px，防止 iOS 聚焦自动放大 */
+  .gate__input-wrap input,
+  .cm-field input, .cm-field select, .cm-field textarea,
+  .cloud-form input,
+  .pmsg-compose textarea, .msg-compose textarea { font-size: 16px; }
+  /* 小字提档 */
+  .tag { font-size: 12px; }
+  .m-item__meta, .m-item__up { font-size: 12.5px; }
+  .msg-item__time, .pmsg-compose__who, .msg-compose__who { font-size: 12px; }
+  .admin-sub { font-size: 13px; }
+  /* 控制台操作列纵向留足间距 */
+  .cm-row { gap: 12px; }
+  .cm-row__ops { gap: 8px; }
+}
+
+/* 触屏设备：悬停信息常显（桌面保留 hover 交互） */
+@media (hover: none) {
+  .m-item__overlay { opacity: 1; background: linear-gradient(transparent 30%, rgba(8, 8, 10, 0.72)); }
+  .m-item__title, .m-item__meta { display: block; }
+  .person-card__hover { max-height: 220px; opacity: 1; margin-top: 12px; }
+  .class-photo__info { opacity: 1; transform: none; }
+  .profile-mem__title { opacity: 1; }
+}
+
+/* 手机横屏：Hero 收紧，一屏放得下 */
+@media (max-height: 520px) and (orientation: landscape) {
+  .hero { min-height: auto; padding: calc(var(--nav-h) + 14px) 0 30px; }
+  .hero__line { font-size: clamp(26px, 5.5vw, 40px); }
+  .hero__line--sub { font-size: clamp(18px, 3.6vw, 28px); }
+  .hero__subtitle { margin-top: 12px; font-size: 14px; }
+  .hero__eyebrow { margin-bottom: 12px; }
+  .hero__scroll { display: none; }
+  .page-head { padding: calc(var(--nav-h) + 18px) 0 34px; }
+}
+
